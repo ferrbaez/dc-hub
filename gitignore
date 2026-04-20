@@ -1,0 +1,38 @@
+# dependencies
+node_modules
+.pnpm-store
+
+# next.js
+.next
+out
+build
+
+# env
+.env
+.env.local
+.env.*.local
+
+# logs
+*.log
+npm-debug.log*
+pnpm-debug.log*
+
+# typescript
+*.tsbuildinfo
+next-env.d.ts
+
+# editor
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
+.idea
+
+# os
+.DS_Store
+Thumbs.db
+
+# docker volumes (if mounted locally)
+.docker-data
+
+# drizzle
+drizzle/.drizzle/

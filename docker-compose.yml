@@ -4,17 +4,17 @@ services:
   local_db:
     image: timescale/timescaledb:latest-pg16
     container_name: hub_local_db
-    environment:
-      POSTGRES_USER: ${LOCAL_DB_USER:-ops}
-      POSTGRES_PASSWORD: ${LOCAL_DB_PASSWORD:?set LOCAL_DB_PASSWORD in .env.local}
-      POSTGRES_DB: ${LOCAL_DB_NAME:-ops_console}
+    env_file:
+      - .env.local
+    # Host port 5433 to avoid colliding with a local brew postgresql that
+    # already listens on 5432. Inside the container Postgres stays on 5432.
     ports:
-      - "5432:5432"
+      - "5433:5432"
     volumes:
       - local_db_data:/var/lib/postgresql/data
     restart: unless-stopped
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${LOCAL_DB_USER:-ops}"]
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER:-ops}"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -22,10 +22,10 @@ services:
   n8n:
     image: n8nio/n8n:latest
     container_name: hub_n8n
+    env_file:
+      - .env.local
     environment:
       N8N_BASIC_AUTH_ACTIVE: "true"
-      N8N_BASIC_AUTH_USER: ${N8N_USER:-admin}
-      N8N_BASIC_AUTH_PASSWORD: ${N8N_PASSWORD:?set N8N_PASSWORD in .env.local}
       N8N_HOST: localhost
       N8N_PORT: 5678
       N8N_PROTOCOL: http

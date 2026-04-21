@@ -25,8 +25,21 @@ not scaffold a candidate unless Willian explicitly picks it.
 
 > Claude Code: update this section at the end of each working session.
 
-- [ ] Module 0 — scaffold
-- [ ] — no modules shipped yet
+- [x] Module 0 — scaffold (shipped 2026-04-20)
+- [x] Auth (shipped 2026-04-20) — NextAuth v5 credentials + bcrypt, JWT sessions (30d), middleware gating all routes except `/login`, `pnpm user:create` CLI, UserMenu in header, SessionProvider in root
+- [x] Analytics chat module (shipped 2026-04-20) — natural-language to SQL against ICS/SCADA/local with Claude Sonnet 4.6, schema prompt cached, SELECT-only validator with SCADA Time_Stamp enforcement, result table + highlighted analysis + Excel export via `exceljs`, per-user conversation history
+
+Scaffold summary:
+- Next.js 15 (App Router) + React 18.3 + TypeScript strict (`noUncheckedIndexedAccess`)
+- Tailwind + shadcn/ui primitives (`card`, `table`) + Tremor for dashboard widgets
+- Biome 1.9.4 — `pnpm lint` / `pnpm typecheck` clean, `pnpm build` passes
+- Drizzle ORM + `drizzle-kit`; local schema at `src/schema/local.ts` (seed: `job_runs`); ICS type mirror at `src/schema/ics-mirror.ts` (containers, containers_details, projects, customers)
+- DB clients at `src/lib/db/{ics,scada,local}.ts`. SCADA helper enforces pool `max=2`, `READ UNCOMMITTED` on every session, explicit 30s default timeout, and throws a typed `ScadaUnreachableError` on network codes. ICS and local DB have matching `IcsUnreachableError` / `LocalDbUnreachableError`.
+- tRPC v11 wired with superjson; error middleware maps typed unreachable errors to `SERVICE_UNAVAILABLE` and config errors to `PRECONDITION_FAILED`. Routers: `containers.list`, `health.all`.
+- Demo page at `/` — client component, consumes `trpc.containers.list`, renders Tremor `Metric`s + shadcn `Table`, shows "ICS unreachable — connect VPN" state on `SERVICE_UNAVAILABLE` / `PRECONDITION_FAILED`.
+- Docker Compose auto-loads `.env.local` via `env_file:` on both services (TimescaleDB + n8n). Postgres uses native `POSTGRES_*` names; no duplication between app and container env.
+- `pnpm healthcheck` — runs all three pings in parallel, colored terminal output, exits non-zero on any failure.
+- Corepack-managed pnpm 9.15.0 via `packageManager` field; Node pinned with `.nvmrc` (20).
 
 ---
 
@@ -159,4 +172,7 @@ Each module must justify itself in real daily use. If after a week you're not us
 
 > Record when modules ship, graduate, or are archived.
 
-*(empty)*
+- 2026-04-20 — Module 0 (scaffold) shipped. Next.js 15 + tRPC v11 + Drizzle + Biome + docker compose (TimescaleDB + n8n) + healthcheck script + demo page listing ICS containers.
+- 2026-04-20 — Shell polish: collapsible sidebar with Penguin palette (obsidian + lime + violet), header with auto-refresh selector (off/1m/5m/30m, localStorage-persisted), VPN/ICS/SCADA health chip, search + "solo hashing" filter on containers table, W/TH efficiency column with color encoding (≤25 green, ≤35 amber, >35 red).
+- 2026-04-20 — Auth module shipped. NextAuth v5 (Auth.js beta.31) with credentials provider, JWT sessions, bcryptjs (12 rounds), Edge-safe middleware split (auth.config.ts vs auth.ts), login page at `(auth)/login`, CLI `pnpm user:create`, tRPC `protectedProcedure`.
+- 2026-04-20 — Analytics chat module shipped. `/analytics` route with conversation list + chat UI + highlighted analysis block + result table + SQL collapsible + Excel download. Backend: Anthropic SDK (Sonnet 4.6 with adaptive thinking + effort high), schema prompt caching (~90% token reduction on repeat queries), SELECT-only SQL validator, SCADA Time_Stamp filter enforcement, per-user conversation history with jsonb-stored results. Known follow-up: streaming the analysis token-by-token (v1 is one-shot).

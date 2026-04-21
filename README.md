@@ -14,6 +14,9 @@ for profitability, SLAs, and maintenance analytics.
 ## Quick start
 
 ```bash
+# 0. enable corepack once (provides pnpm automatically from package.json)
+corepack enable
+
 # 1. install
 pnpm install
 
@@ -21,13 +24,13 @@ pnpm install
 cp .env.example .env.local
 # fill in ICS and SCADA credentials
 
-# 3. local services
+# 3. local services (docker compose auto-loads .env.local)
 docker compose up -d
 
 # 4. schema for local DB
 pnpm db:push
 
-# 5. verify external connectivity (connect VPN first)
+# 5. verify all three connections (connect VPN first)
 pnpm healthcheck
 
 # 6. dev server
@@ -41,7 +44,8 @@ Open http://localhost:3000.
 - [`CLAUDE.md`](./CLAUDE.md) — working instructions for Claude Code and project overview
 - [`docs/ARCHITECTURE.md`](./docs/ARCHITECTURE.md) — how the pieces fit together
 - [`docs/DATA_SOURCES.md`](./docs/DATA_SOURCES.md) — ICS and SCADA schemas, connection rules, query patterns
-- [`docs/ROADMAP.md`](./docs/ROADMAP.md) — phased build plan
+- [`docs/ROADMAP.md`](./docs/ROADMAP.md) — living backlog of modules
+- [`docs/schemas/`](./docs/schemas/) — full DDLs (`ics.sql`, `scada.sql`) and the dense `scada-summary.md` reference
 
 ## Safety notes
 

@@ -1,6 +1,7 @@
 import { AnthropicConfigError } from "@/lib/anthropic";
 import { IcsConfigError, IcsUnreachableError } from "@/lib/db/ics";
 import { LocalDbUnreachableError } from "@/lib/db/local";
+import { RevenueConfigError, RevenueUnreachableError } from "@/lib/db/revenue";
 import { ScadaConfigError, ScadaUnreachableError } from "@/lib/db/scada";
 import type { Context } from "@/server/context";
 import { TRPCError, initTRPC } from "@trpc/server";
@@ -28,7 +29,8 @@ const errorMappingMiddleware = t.middleware(async ({ next }) => {
     if (
       err instanceof IcsUnreachableError ||
       err instanceof ScadaUnreachableError ||
-      err instanceof LocalDbUnreachableError
+      err instanceof LocalDbUnreachableError ||
+      err instanceof RevenueUnreachableError
     ) {
       throw new TRPCError({
         code: "SERVICE_UNAVAILABLE",
@@ -39,6 +41,7 @@ const errorMappingMiddleware = t.middleware(async ({ next }) => {
     if (
       err instanceof IcsConfigError ||
       err instanceof ScadaConfigError ||
+      err instanceof RevenueConfigError ||
       err instanceof AnthropicConfigError
     ) {
       throw new TRPCError({

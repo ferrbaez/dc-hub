@@ -2,6 +2,7 @@ import {
   AnalyticsError,
   type SqlPlan,
   type TokenUsage,
+  asPlan,
   generateAnalysis,
   generateFollowupPlan,
   generatePlan,
@@ -184,22 +185,53 @@ export const chatRouter = router({
       });
 
       try {
-        const { plan, usage: planUsage } = await generatePlan(input.question, { history });
-        const result = await runPlan(plan);
+        const { result: planResult, usage: planUsage } = await generatePlan(input.question, {
+          history,
+        });
+
+        // Clarification branch — no SQL executed, message holds the question + candidates
+        if (planResult.action === "clarify") {
+          const [stored] = await db
+            .insert(chatMessages)
+            .values({
+              conversationId,
+              role: "assistant",
+              content: planResult.clarification ?? "",
+              rationale: planResult.rationale,
+              metadata: { kind: "clarification", candidates: planResult.candidates ?? [] },
+              inputTokens: planUsage.inputTokens,
+              outputTokens: planUsage.outputTokens,
+              cacheReadTokens: planUsage.cacheReadTokens,
+              cacheCreationTokens: planUsage.cacheCreationTokens,
+            })
+            .returning({ id: chatMessages.id });
+          await touchConversation(conversationId);
+          return {
+            conversationId: conversationId.toString(),
+            messageId: stored?.id.toString() ?? null,
+            kind: "clarification" as const,
+            clarification: planResult.clarification ?? "",
+            candidates: planResult.candidates ?? [],
+            rationale: planResult.rationale,
+            usage: planUsage,
+          };
+        }
+
+        // Execute branch — save as DRAFT (SQL only, no execution).
+        // User reviews the SQL and clicks "Ejecutar" to run it via `runSql`.
+        // Two-step flow: (1) Claude plans → (2) user confirms & executes.
+        const plan = asPlan(planResult);
 
         const [stored] = await db
           .insert(chatMessages)
           .values({
             conversationId,
             role: "assistant",
-            content: "", // no analysis yet — user clicks "Analizar" for that
+            content: "",
             sqlGenerated: plan.sql,
             dataSource: plan.data_source,
             rationale: plan.rationale,
-            resultRows: result.rows,
-            resultColumns: result.columns,
-            rowCount: result.rowCount,
-            durationMs: result.durationMs,
+            // resultRows/resultColumns/rowCount/durationMs intentionally null — draft
             inputTokens: planUsage.inputTokens,
             outputTokens: planUsage.outputTokens,
             cacheReadTokens: planUsage.cacheReadTokens,
@@ -212,8 +244,8 @@ export const chatRouter = router({
         return {
           conversationId: conversationId.toString(),
           messageId: stored?.id.toString() ?? null,
+          kind: "draft" as const,
           plan,
-          result,
           usage: planUsage,
         };
       } catch (err) {
@@ -345,7 +377,7 @@ export const chatRouter = router({
       };
 
       try {
-        const { plan, usage } = await generateFollowupPlan(
+        const { result: planResult, usage } = await generateFollowupPlan(
           priorUserQuestion,
           priorPlan,
           priorResult,
@@ -357,6 +389,34 @@ export const chatRouter = router({
           role: "user",
           content: "Consulta complementaria más analítica",
         });
+
+        // Follow-up can also return a clarification if ambiguous
+        if (planResult.action === "clarify") {
+          const [stored] = await db
+            .insert(chatMessages)
+            .values({
+              conversationId: message.conversationId,
+              role: "assistant",
+              content: planResult.clarification ?? "",
+              rationale: planResult.rationale,
+              metadata: { kind: "clarification", candidates: planResult.candidates ?? [] },
+              inputTokens: usage.inputTokens,
+              outputTokens: usage.outputTokens,
+              cacheReadTokens: usage.cacheReadTokens,
+              cacheCreationTokens: usage.cacheCreationTokens,
+            })
+            .returning({ id: chatMessages.id });
+          await touchConversation(message.conversationId);
+          return {
+            messageId: stored?.id.toString() ?? null,
+            kind: "clarification" as const,
+            clarification: planResult.clarification ?? "",
+            candidates: planResult.candidates ?? [],
+            usage,
+          };
+        }
+
+        const plan = asPlan(planResult);
 
         // Draft assistant message — SQL filled, no result
         const [draft] = await db
@@ -378,6 +438,7 @@ export const chatRouter = router({
         await touchConversation(message.conversationId);
         return {
           messageId: draft?.id.toString() ?? null,
+          kind: "execute" as const,
           plan,
           usage,
         };

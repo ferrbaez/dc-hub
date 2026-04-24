@@ -1,9 +1,23 @@
 import "server-only";
 import { IcsUnreachableError, getIcsPool, isIcsUnreachableError } from "@/lib/db/ics";
 import { getLocalPool } from "@/lib/db/local";
+import {
+  RevenueUnreachableError,
+  getRevenuePool,
+  isRevenueUnreachableError,
+} from "@/lib/db/revenue";
 import { ScadaUnreachableError, getScadaRequest, isScadaUnreachableError } from "@/lib/db/scada";
 
-export type DataSource = "ics" | "scada" | "local";
+export type DataSource = "ics" | "scada" | "local" | "revenue_mara" | "revenue_nd" | "revenue_zp";
+
+export const DATA_SOURCE_VALUES: readonly DataSource[] = [
+  "ics",
+  "scada",
+  "local",
+  "revenue_mara",
+  "revenue_nd",
+  "revenue_zp",
+];
 
 export type ExecutionResult = {
   columns: string[];
@@ -36,11 +50,6 @@ function collectColumns(rows: Record<string, unknown>[]): string[] {
   return Array.from(cols);
 }
 
-/**
- * JSON-serialize a row, converting pg/mssql runtime types (Date, bigint, Buffer)
- * to primitives the frontend can render. Drizzle/pg/mssql return Dates for
- * timestamps, strings for numerics/bigints (pg) or numbers (mssql).
- */
 function normalizeRow(row: Record<string, unknown>): Record<string, unknown> {
   const out: Record<string, unknown> = {};
   for (const [k, v] of Object.entries(row)) {
@@ -53,6 +62,19 @@ function normalizeRow(row: Record<string, unknown>): Record<string, unknown> {
   return out;
 }
 
+function revenuePoolFor(dataSource: DataSource) {
+  switch (dataSource) {
+    case "revenue_mara":
+      return getRevenuePool("mara_reporting");
+    case "revenue_nd":
+      return getRevenuePool("nd_reporting");
+    case "revenue_zp":
+      return getRevenuePool("zp_reporting");
+    default:
+      return null;
+  }
+}
+
 export async function executeQuery(
   dataSource: DataSource,
   sql: string,
@@ -63,6 +85,29 @@ export async function executeQuery(
   const timeoutMs = opts.timeoutMs ?? DEFAULT_TIMEOUT_MS;
 
   try {
+    // Revenue (3 Postgres DBs on same host, isolated pools)
+    const revenuePool = revenuePoolFor(dataSource);
+    if (revenuePool) {
+      const client = await revenuePool.connect();
+      try {
+        await client.query(`SET statement_timeout = ${timeoutMs}`);
+        const res = await client.query(sql);
+        const rawRows = (res.rows ?? []) as Record<string, unknown>[];
+        const truncated = rawRows.length > maxRows;
+        const rows = (truncated ? rawRows.slice(0, maxRows) : rawRows).map(normalizeRow);
+        const columns = res.fields?.map((f) => f.name) ?? collectColumns(rows);
+        return {
+          columns,
+          rows,
+          rowCount: rawRows.length,
+          durationMs: Date.now() - start,
+          truncated,
+        };
+      } finally {
+        client.release();
+      }
+    }
+
     if (dataSource === "ics" || dataSource === "local") {
       const pool = dataSource === "ics" ? getIcsPool() : getLocalPool();
       const client = await pool.connect();
@@ -103,12 +148,25 @@ export async function executeQuery(
 
     throw new Error(`unknown data source: ${dataSource as string}`);
   } catch (err) {
-    // Re-throw our typed unreachable errors (the tRPC middleware maps them)
-    if (err instanceof IcsUnreachableError || err instanceof ScadaUnreachableError) {
+    if (
+      err instanceof IcsUnreachableError ||
+      err instanceof ScadaUnreachableError ||
+      err instanceof RevenueUnreachableError
+    ) {
       throw err;
     }
     if (isIcsUnreachableError(err)) throw new IcsUnreachableError(err);
     if (isScadaUnreachableError(err)) throw new ScadaUnreachableError(err);
+    // Revenue reachability: infer target DB from data source name
+    if (isRevenueUnreachableError(err)) {
+      const db =
+        dataSource === "revenue_mara"
+          ? "mara_reporting"
+          : dataSource === "revenue_nd"
+            ? "nd_reporting"
+            : "zp_reporting";
+      throw new RevenueUnreachableError(db, err);
+    }
     throw new QueryExecutionError(dataSource, err);
   }
 }

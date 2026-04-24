@@ -1,4 +1,4 @@
-name: willians-hub
+name: dc-hub
 
 services:
   local_db:

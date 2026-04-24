@@ -7,6 +7,7 @@ import {
   ChevronsLeft,
   ChevronsRight,
   LayoutDashboard,
+  LineChart,
   type LucideIcon,
   MessageSquareText,
   ShieldCheck,
@@ -26,6 +27,7 @@ type NavItem = {
 const NAV: NavItem[] = [
   { href: "/", label: "Dashboard", icon: LayoutDashboard },
   { href: "/analytics", label: "Analytics", icon: MessageSquareText },
+  { href: "/graficos", label: "Gráficos", icon: LineChart },
   { href: "/rentabilidad", label: "Rentabilidad", icon: BarChart3, disabled: true },
   { href: "/consumo", label: "Consumo", icon: Zap, disabled: true },
   { href: "/slas", label: "SLAs", icon: ShieldCheck, disabled: true },

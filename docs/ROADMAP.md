@@ -28,6 +28,9 @@ not scaffold a candidate unless Willian explicitly picks it.
 - [x] Module 0 — scaffold (shipped 2026-04-20)
 - [x] Auth (shipped 2026-04-20) — NextAuth v5 credentials + bcrypt, JWT sessions (30d), middleware gating all routes except `/login`, `pnpm user:create` CLI, UserMenu in header, SessionProvider in root
 - [x] Analytics chat module (shipped 2026-04-20) — natural-language to SQL against ICS/SCADA/local with Claude Sonnet 4.6, schema prompt cached, SELECT-only validator with SCADA Time_Stamp enforcement, result table + highlighted analysis + Excel export via `exceljs`, per-user conversation history
+- [x] Site Baseline (shipped 2026-04-21) — `docs/SITE_BASELINE.md` canonical source of truth for topology (customer↔project↔container↔feeder↔transformer), operational thresholds, ND int64 energy concat, tariff model. Injected into the Claude cached prompt as SITE TOPOLOGY section.
+- [x] Revenue 4th data source (shipped 2026-04-21) — `src/lib/db/revenue.ts` with 3 isolated pools (mara_reporting, nd_reporting, zp_reporting), read-only, integrated into healthcheck + executor + analytics chat enum. Unlocks per-client daily/minute energy + BTC revenue queries.
+- [x] Local schema: tariffs + machine catalog (shipped 2026-04-21) — `client_tariffs`, `client_tariff_history` (audit), `machine_configs` tables.
 
 Scaffold summary:
 - Next.js 15 (App Router) + React 18.3 + TypeScript strict (`noUncheckedIndexedAccess`)
@@ -73,12 +76,34 @@ healthchecked, and linting/typing are clean.
 
 Each candidate is sized so it can be picked up cold. They are not ranked.
 
-### Rentabilidad
+### Estado de Producción (card nueva, pedida por Willian)
 
-**What:** profitability overview per site and per project.
-**Data:** ICS only — `containers_details`, `project_details`, `pools`, `blockchain_details`, `container_histories`, `project_histories`.
-**Why it's quick:** ICS already holds everything needed. No SCADA required for a v1.
-**Notes:** $/kWh per project is user-configurable, stored in local DB.
+**What:** vista por container con KPIs operativos: online uptime, hashing uptime, total_miners, miners_pending, reparaciones (delta total-hashing), badge por estado.
+**Data:** ICS `containers_details` + (opcional) Foreman CSV importado a local DB para modelo de miner por container.
+**Why quick:** datos ya disponibles en ICS; sólo UI.
+**Notes:** agregado por cliente al topo. Threshold de alerta si uptime < 95% rolling 24h.
+
+### Cooling (card nueva, pedida por Willian)
+
+**What:** vista por container con temperaturas agua in/out + delta, pasillo frío/caliente (aire, para ND), caudal, presión, flow de bomba. Comparado contra umbrales del SITE_BASELINE §8.
+**Data:** SCADA — `Registros_N*` (agua + aire para ND), `Registros_F*`/`Registros_D*` (F##_TT01/TT02 para Hydro otros clientes), `Registros_EM01` para baseline meteorológico.
+**Regla:** distinguir agua (`Temperature_In`/`Out` o `TT01`/`TT02`) de aire (`R#_T1`/`T2` en ND).
+**Alertas:** ND agua > 45°C, Hydro agua > 40°C, trafos > EM01+50°C.
+
+### Eléctrico (card nueva, pedida por Willian)
+
+**What:** vista por container con potencia activa por fase, corriente por fase, tensión línea-línea, factor de potencia, energía acumulada. Por alimentador y por trafo.
+**Data:** SCADA `Registros_*` granular + `Alimentadores` + `Temp_Trafos_*` + `H2Sense_*` para salud trafos.
+**Feature:** drill-down desde alimentador → containers que alimenta (usando mapping §5 del SITE_BASELINE).
+**Regla:** para ND energía usar concat int64 (ver SITE_BASELINE §10).
+
+### Rentabilidad (ahora desbloqueado)
+
+**What:** profitability overview per project — USD revenue vs USD costos (energía × tarifa × consumo).
+**Data:** Revenue DBs (`pools_data` daily revenue BTC + `energy_consumption` daily kWh) × ICS `blockchain_histories` (BTC/USD price) × Local `client_tariffs` (breakdown USD/kWh).
+**Desglose por tarifa:** energy pass-through / hosting fee / social / VAT separados.
+**Split por tariff window:** `pc` (Punta de Carga) vs `fpc` (Fuera de Punta) de `energy_consumption`.
+**v1:** tabla mensual por proyecto. **v2:** página `/tarifas` para cargar/editar `client_tariffs` con historial.
 
 ### Consumo real + drift (SCADA)
 
@@ -176,3 +201,4 @@ Each module must justify itself in real daily use. If after a week you're not us
 - 2026-04-20 — Shell polish: collapsible sidebar with Penguin palette (obsidian + lime + violet), header with auto-refresh selector (off/1m/5m/30m, localStorage-persisted), VPN/ICS/SCADA health chip, search + "solo hashing" filter on containers table, W/TH efficiency column with color encoding (≤25 green, ≤35 amber, >35 red).
 - 2026-04-20 — Auth module shipped. NextAuth v5 (Auth.js beta.31) with credentials provider, JWT sessions, bcryptjs (12 rounds), Edge-safe middleware split (auth.config.ts vs auth.ts), login page at `(auth)/login`, CLI `pnpm user:create`, tRPC `protectedProcedure`.
 - 2026-04-20 — Analytics chat module shipped. `/analytics` route with conversation list + chat UI + highlighted analysis block + result table + SQL collapsible + Excel download. Backend: Anthropic SDK (Sonnet 4.6 with adaptive thinking + effort high), schema prompt caching (~90% token reduction on repeat queries), SELECT-only SQL validator, SCADA Time_Stamp filter enforcement, per-user conversation history with jsonb-stored results. Known follow-up: streaming the analysis token-by-token (v1 is one-shot).
+- 2026-04-21 — Site Baseline + Revenue source shipped. `docs/SITE_BASELINE.md` canonical topology doc (customer↔project↔container↔feeder↔transformer mapping, operational thresholds, ND int64 energy concat rule, tariff breakdown model). Analytics chat data_source enum expanded from 3 → 6 (added `revenue_mara`, `revenue_nd`, `revenue_zp`). Topology injected into cached system prompt. Local schema gained `client_tariffs` + `client_tariff_history` + `machine_configs`. Healthcheck covers all 4 sources.

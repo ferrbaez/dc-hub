@@ -1,10 +1,11 @@
 import "server-only";
 import { icsPing } from "@/lib/db/ics";
 import { localDbPing } from "@/lib/db/local";
+import { revenuePing } from "@/lib/db/revenue";
 import { scadaPing } from "@/lib/db/scada";
 
 export type SourceHealth = {
-  source: "local" | "ics" | "scada";
+  source: "local" | "ics" | "scada" | "revenue";
   ok: boolean;
   latencyMs?: number;
   error?: { code: string; message: string };
@@ -35,5 +36,6 @@ export async function runHealthcheck(): Promise<SourceHealth[]> {
     check("local", localDbPing),
     check("ics", icsPing),
     check("scada", scadaPing),
+    check("revenue", revenuePing),
   ]);
 }

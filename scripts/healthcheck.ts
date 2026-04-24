@@ -6,6 +6,7 @@
 import { runHealthcheck } from "../src/lib/db/healthcheck";
 import { getIcsPool } from "../src/lib/db/ics";
 import { getLocalPool } from "../src/lib/db/local";
+import { closeRevenuePools } from "../src/lib/db/revenue";
 import { getScadaPool } from "../src/lib/db/scada";
 
 const PAD = 36;
@@ -19,12 +20,13 @@ function label(source: string) {
     local: "Local DB (TimescaleDB, localhost)",
     ics: "ICS (Postgres, VPN)",
     scada: "SCADA (SQL Server, AVEVA Edge)",
+    revenue: "Revenue (3 Postgres DBs, VPN)",
   };
   return map[source] ?? source;
 }
 
 async function main() {
-  console.log("Running healthcheck on all three data sources...\n");
+  console.log("Running healthcheck on all four data sources...\n");
   const results = await runHealthcheck();
 
   for (const r of results) {
@@ -59,6 +61,7 @@ async function main() {
         if (p) await p.close();
       } catch {}
     })(),
+    closeRevenuePools(),
   ]);
 
   process.exit(healthy === results.length ? 0 : 1);

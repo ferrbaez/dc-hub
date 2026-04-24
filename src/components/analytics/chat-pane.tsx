@@ -14,7 +14,15 @@ const EXAMPLES = [
   "Modulaciones de los últimos 30 días ordenadas por energía perdida",
 ];
 
-type AskPending = { question: string } | null;
+/**
+ * Pending is keyed by the conversation the user submitted against. That way,
+ * navigating to a different chat hides the spinner here (it belongs to another
+ * conversation) but it stays in memory and re-appears if the user returns to
+ * the originating conversation before the mutation resolves.
+ * `conversationId: null` = the user submitted from the "new conversation"
+ * empty state.
+ */
+type AskPending = { conversationId: string | null; question: string } | null;
 
 function EmptyState({
   onExampleClick,
@@ -80,6 +88,8 @@ export function ChatPane({ conversationId }: { conversationId: string | null }) 
   const [pending, setPending] = useState<AskPending>(null);
   const [submitError, setSubmitError] = useState<{ code: string; message: string } | null>(null);
   const [analyzingId, setAnalyzingId] = useState<string | null>(null);
+  const [streamingAnalysisForId, setStreamingAnalysisForId] = useState<string | null>(null);
+  const [streamingText, setStreamingText] = useState("");
   const [followingUpId, setFollowingUpId] = useState<string | null>(null);
   const [runningId, setRunningId] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -114,16 +124,46 @@ export function ChatPane({ conversationId }: { conversationId: string | null }) 
     },
   });
 
-  const analyzeMut = trpc.chat.analyze.useMutation({
-    onSuccess: () => {
+  async function streamAnalyze(messageId: string) {
+    setAnalyzingId(messageId);
+    setStreamingAnalysisForId(messageId);
+    setStreamingText("");
+    setSubmitError(null);
+
+    try {
+      const res = await fetch(`/api/analytics/stream-analysis/${messageId}`, {
+        method: "POST",
+      });
+      if (!res.ok) {
+        const text = await res.text();
+        const [code, ...rest] = text.split(": ");
+        throw new Error(rest.join(": ") || text, { cause: { code } });
+      }
+      if (!res.body) throw new Error("sin respuesta del servidor");
+
+      const reader = res.body.getReader();
+      const decoder = new TextDecoder();
+      let acc = "";
+      while (true) {
+        const { value, done } = await reader.read();
+        if (done) break;
+        const chunk = decoder.decode(value, { stream: true });
+        acc += chunk;
+        setStreamingText(acc);
+      }
+    } catch (err) {
+      const cause = (err as { cause?: { code?: string } }).cause;
+      setSubmitError({
+        code: cause?.code ?? "UNKNOWN",
+        message: err instanceof Error ? err.message : String(err),
+      });
+    } finally {
       setAnalyzingId(null);
+      setStreamingAnalysisForId(null);
+      setStreamingText("");
       invalidate();
-    },
-    onError: (err) => {
-      setAnalyzingId(null);
-      setSubmitError({ code: err.data?.code ?? "UNKNOWN", message: err.message });
-    },
-  });
+    }
+  }
 
   const followupMut = trpc.chat.followup.useMutation({
     onSuccess: () => {
@@ -157,7 +197,7 @@ export function ChatPane({ conversationId }: { conversationId: string | null }) 
     if (!trimmed || ask.isPending) return;
     setInput("");
     setSubmitError(null);
-    setPending({ question: trimmed });
+    setPending({ conversationId: conversationId ?? null, question: trimmed });
     ask.mutate({ conversationId: conversationId ?? undefined, question: trimmed });
   }
 
@@ -170,13 +210,23 @@ export function ChatPane({ conversationId }: { conversationId: string | null }) 
 
   const messages = (conversation.data?.messages ?? []) as unknown as MessageRow[];
   const isLoadingConversation = !!conversationId && conversation.isLoading;
-  const showEmpty = !conversationId && messages.length === 0 && !pending;
+
+  // A pending request is visible only in the conversation it belongs to.
+  // Switching away keeps pending alive in memory but hides the spinner here.
+  const pendingBelongsHere = !!pending && pending.conversationId === (conversationId ?? null);
+  const showEmpty = !conversationId && messages.length === 0 && !pendingBelongsHere;
+
+  // Dedup guard: the server inserts the user message into the DB before
+  // Claude responds, so a window-focus refetch mid-mutation can return that
+  // user message while we're still showing the optimistic `pending` one.
+  // If the last message already matches, skip the optimistic render.
+  const lastMessage = messages[messages.length - 1];
+  const serverAlreadyHasPending =
+    pendingBelongsHere && lastMessage?.role === "user" && lastMessage.content === pending.question;
 
   const actions = {
     onAnalyze: (messageId: string) => {
-      setAnalyzingId(messageId);
-      setSubmitError(null);
-      analyzeMut.mutate({ messageId });
+      streamAnalyze(messageId);
     },
     onFollowup: (messageId: string) => {
       setFollowingUpId(messageId);
@@ -188,9 +238,14 @@ export function ChatPane({ conversationId }: { conversationId: string | null }) 
       setSubmitError(null);
       runMut.mutate({ messageId });
     },
+    // User picked a candidate from a clarification — send it as a new question.
+    // Claude will see the prior clarification in history and map it to real SQL.
+    onClarify: (answer: string) => submit(answer),
     analyzingId,
     followingUpId,
     runningId,
+    streamingAnalysisForId,
+    streamingText,
   };
 
   return (
@@ -213,16 +268,21 @@ export function ChatPane({ conversationId }: { conversationId: string | null }) 
               ),
             )}
 
-            {pending && (
+            {pendingBelongsHere && pending && (
               <>
-                <UserMessage content={pending.question} />
+                {!serverAlreadyHasPending && <UserMessage content={pending.question} />}
                 <div className="flex items-start gap-3">
                   <div className="mt-0.5 grid h-7 w-7 shrink-0 place-items-center rounded-full bg-penguin-obsidian text-penguin-lime">
                     <Sparkles className="h-3.5 w-3.5 animate-pulse" />
                   </div>
-                  <div className="flex items-center gap-2 pt-1 text-sm text-penguin-cool-gray">
-                    <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                    Generando SQL y ejecutando...
+                  <div className="flex flex-col gap-0.5 pt-1 text-sm text-penguin-cool-gray">
+                    <div className="flex items-center gap-2">
+                      <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                      Generando SQL...
+                    </div>
+                    <div className="pl-5 text-[10px] text-slate-400">
+                      Después lo podés revisar y ejecutar con el botón Ejecutar.
+                    </div>
                   </div>
                 </div>
               </>
@@ -271,7 +331,7 @@ export function ChatPane({ conversationId }: { conversationId: string | null }) 
           </div>
           <p className="mt-1.5 px-1 text-[10px] text-penguin-cool-gray">
             Solo queries de lectura · Sonnet 4.6 · SQL validado antes de ejecutarse · Análisis y
-            follow-up son opt-in
+            follow-up son opt-in · El SQL aparece como draft para que lo revises antes de ejecutar
           </p>
         </div>
       </div>

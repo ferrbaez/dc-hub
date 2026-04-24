@@ -1,6 +1,6 @@
 # Data Sources — Willian's Hub
 
-Operational reference for how to query ICS and SCADA safely. Claude Code should
+Operational reference for how to query ICS, SCADA, Local and Revenue safely. Claude Code should
 consult this before writing any query.
 
 For **exact schemas** (column names, types, constraints), see:
@@ -8,8 +8,11 @@ For **exact schemas** (column names, types, constraints), see:
 - `docs/schemas/scada.sql` — full SCADA SQL Server DDL (180 tables)
 - `docs/schemas/scada-summary.md` — dense pattern-based SCADA reference
 
+For **site topology, clients, projects, tariffs, transformer-to-container mapping**, see:
+- `docs/SITE_BASELINE.md` — canonical source of truth about the business
+
 This file describes **how to use** the data. The `schemas/` files describe **what
-exists**.
+exists**. `SITE_BASELINE.md` describes **what it means**.
 
 ---
 
@@ -127,12 +130,14 @@ Quick reference:
 |---|---|---|
 | `Registros_*` | ~130 | Granular electrical measurements per feeder / container / transformer |
 | `H2Sense_*` | 42 | Transformer health sensors (temp, H2, oil, pressure) |
-| Pre-aggregated | handful | `Alimentadores`, `Auxiliar`, `PUE_Registros`, `Voltage_Trends`, `Temp_Trafos_*`, `Consumo_Saz_CW1` |
+| Pre-aggregated | handful | `Alimentadores`, `Auxiliar`, `PUE_Registros`, `Voltage_Trends`, `Temp_Trafos_*`, `Consumo_Saz_CW1`, `clients_total_power` |
 | Logs | 4 | `ALARMHISTORY`, `EVENTHISTORY`, `Auditoria_Tabla`, `AlertasRepeticion` |
 
 **Always prefer pre-aggregated tables when they answer the question.** They're
 cheap, already indexed, and designed for this kind of use. Example: total site
 consumption comes from one `Alimentadores` query, not 15 separate `Registros_AL*` queries.
+
+**Note about `clients_total_power`**: this IS a valid pre-aggregation — a running sum of active power across all client containers (the `$SumaCliente_kW` computed in the SCADA VBScript). An earlier revision of this doc incorrectly said to avoid it; that guidance is superseded. For hashrate, however, **still prefer ICS** over `clients_hashrate` — ICS is the source of truth there.
 
 ### Query template
 
@@ -196,3 +201,47 @@ Managed by us, Drizzle migrations, hypertables for time-series caches.
 - Index on `(entity_id, time)` for all time-series queries
 - Retention policies for cached data (e.g. drop cache older than 90 days)
 - Continuous aggregates for common rollups (hourly, daily)
+
+### Core tables shipped
+
+- `users`, `chat_conversations`, `chat_messages` — auth + analytics chat
+- `client_tariffs`, `client_tariff_history`, `machine_configs` — manually maintained technical breakdown per client/project (see `docs/SITE_BASELINE.md` §15 and §16)
+- `job_runs` — batch job history
+
+---
+
+## Revenue DBs — PostgreSQL (per-client reporting portals)
+
+Three separate Postgres databases on the **same host** `172.16.10.107:5432`, each one belonging to a JV client. Read-only credentials in `.env.local` (`REVENUE_DB_*`).
+
+| Database | Client | Projects |
+|---|---|---|
+| `mara_reporting` | MARATHON | JV2, JV3, OCEAN_MARA_GENERAL |
+| `nd_reporting`   | NORTHERN DATA | JV5 |
+| `zp_reporting`   | ZPJV (ZP Ltd.) | JV1-1, JV1-2, JV4 |
+
+All three share the same table layout:
+
+- `projects (id, name, created_at, updated_at)`
+- `energy_consumption (id, date, project_id, power_consumption, pc, fpc, timestamps)` — **daily granularity**
+- `energy_consumption_minute (id, timestamp, project_id, power_consumption, pc, fpc, timestamps)` — **per-minute granularity, timezone-aware**
+- `pools_data (id, date, hashrate, revenue, pool, project_id, timestamps)` — daily revenue/hashrate per pool/project. `nd_reporting` also has `worker`.
+- `users` — portal users (not ours)
+- `zp_reporting.blocks` — blocks found (ZP only)
+
+### Semantics of `pc` / `fpc`
+
+- `pc` = **Punta de Carga** (peak-hour ANDE tariff window, higher rate)
+- `fpc` = **Fuera de Punta de Carga** (off-peak window, lower rate)
+- `power_consumption` ≈ `pc + fpc`
+
+### Query guidance
+
+- Read-only. Pool max=3 per database, connection timeout 5s, statement timeout 30s.
+- For cross-client analytics, run **three parallel queries** in app code and merge — **NOT** foreign data wrappers or any cross-DB join.
+- Refresh cadence observed: daily rows created ~07:00 UTC; minute rows streaming.
+- Use `projects.name` for display — see `docs/SITE_BASELINE.md` §3 for the full alias map (`JV5` → NORTHERN DATA, etc).
+
+### Clients NOT in revenue DBs (Luxor CSV)
+
+AXXA and GUY mine through Luxor pool; their revenue arrives as manual CSV exports (not via Postgres). For v1 we load those manually into the local DB if/when needed.

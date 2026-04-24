@@ -1,7 +1,7 @@
 "use client";
 
 import { cn } from "@/lib/utils";
-import { AlertTriangle, Loader2, Sparkles, TrendingUp, User } from "lucide-react";
+import { AlertTriangle, HelpCircle, Loader2, Sparkles, TrendingUp, User } from "lucide-react";
 import { AnalysisMarkdown } from "./analysis-markdown";
 import { ResultTable } from "./result-table";
 import { SqlBlock } from "./sql-block";
@@ -19,7 +19,24 @@ export type MessageRow = {
   durationMs?: number | null;
   errorCode?: string | null;
   errorMessage?: string | null;
+  metadata?: unknown;
 };
+
+type MessageMetadata = {
+  kind?: "clarification";
+  candidates?: string[];
+};
+
+function readMetadata(raw: unknown): MessageMetadata | null {
+  if (!raw || typeof raw !== "object") return null;
+  const m = raw as Record<string, unknown>;
+  const kind = typeof m.kind === "string" ? (m.kind as MessageMetadata["kind"]) : undefined;
+  const candidates = Array.isArray(m.candidates)
+    ? (m.candidates.filter((c): c is string => typeof c === "string") as string[])
+    : undefined;
+  if (!kind && !candidates) return null;
+  return { kind, candidates };
+}
 
 const DATA_SOURCE_STYLES: Record<string, string> = {
   ics: "bg-penguin-violet/10 text-penguin-violet ring-1 ring-inset ring-penguin-violet/20",
@@ -56,9 +73,12 @@ type AssistantActions = {
   onAnalyze: (messageId: string) => void;
   onFollowup: (messageId: string) => void;
   onRun: (messageId: string) => void;
+  onClarify: (answer: string) => void;
   analyzingId: string | null;
   followingUpId: string | null;
   runningId: string | null;
+  streamingAnalysisForId: string | null;
+  streamingText: string;
 };
 
 export function AssistantMessage({
@@ -78,10 +98,51 @@ export function AssistantMessage({
   const hasAnalysis = !!message.content && message.content.length > 0;
   const hasSql = !!message.sqlGenerated;
   const isDraft = hasSql && !hasResult && !hasError;
+  const metadata = readMetadata(message.metadata);
+  const isClarification = metadata?.kind === "clarification";
 
   const isAnalyzing = actions.analyzingId === message.id;
   const isFollowingUp = actions.followingUpId === message.id;
   const isRunning = actions.runningId === message.id;
+  const isStreamingAnalysis = actions.streamingAnalysisForId === message.id;
+  const streamingContent = isStreamingAnalysis ? actions.streamingText : "";
+
+  // Clarification branch — question + candidate buttons, no SQL/table
+  if (isClarification) {
+    return (
+      <div className="flex items-start gap-3">
+        <div className="mt-0.5 grid h-7 w-7 shrink-0 place-items-center rounded-full bg-penguin-violet/10 text-penguin-violet">
+          <HelpCircle className="h-3.5 w-3.5" />
+        </div>
+        <div className="min-w-0 flex-1 space-y-2 pt-0.5">
+          <div className="rounded-lg border border-penguin-violet/30 bg-penguin-violet/5 p-3">
+            <div className="mb-1.5 flex items-center gap-2 text-[10px] font-semibold uppercase tracking-wider text-penguin-violet">
+              <HelpCircle className="h-3 w-3" />
+              Necesito aclarar algo
+            </div>
+            <p className="text-sm text-penguin-obsidian">{message.content}</p>
+            {message.rationale && (
+              <p className="mt-1 text-[11px] italic text-penguin-cool-gray">{message.rationale}</p>
+            )}
+          </div>
+          {metadata.candidates && metadata.candidates.length > 0 && (
+            <div className="flex flex-wrap gap-1.5">
+              {metadata.candidates.map((c) => (
+                <button
+                  key={c}
+                  type="button"
+                  onClick={() => actions.onClarify(c)}
+                  className="rounded-md border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-penguin-obsidian shadow-sm transition-colors hover:border-penguin-violet/60 hover:bg-penguin-violet/5"
+                >
+                  {c}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  }
 
   // Error branch (and no SQL — only pre-execution errors)
   if (hasError && !hasSql) {
@@ -165,21 +226,35 @@ export function AssistantMessage({
           />
         )}
 
-        {/* Analysis block */}
-        {hasAnalysis && (
+        {/* Analysis block — streaming or saved */}
+        {(hasAnalysis || isStreamingAnalysis) && (
           <div className="rounded-lg border border-penguin-lime/30 bg-penguin-lime/5 p-3">
             <div className="mb-1.5 flex items-center gap-2 text-[10px] font-semibold uppercase tracking-wider text-penguin-obsidian">
-              <Sparkles className="h-3 w-3 text-penguin-obsidian" />
-              Análisis
+              <Sparkles
+                className={cn(
+                  "h-3 w-3 text-penguin-obsidian",
+                  isStreamingAnalysis && "animate-pulse",
+                )}
+              />
+              Análisis{isStreamingAnalysis && streamingContent.length === 0 ? "..." : ""}
             </div>
-            <AnalysisMarkdown content={message.content} />
+            {isStreamingAnalysis && streamingContent.length === 0 ? (
+              <div className="flex items-center gap-2 text-xs text-penguin-cool-gray">
+                <Loader2 className="h-3 w-3 animate-spin" />
+                Generando análisis...
+              </div>
+            ) : (
+              <AnalysisMarkdown
+                content={isStreamingAnalysis ? streamingContent : message.content}
+              />
+            )}
           </div>
         )}
 
         {/* Action buttons */}
         {hasResult && (
           <div className="flex flex-wrap items-center gap-2">
-            {!hasAnalysis && (
+            {!hasAnalysis && !isStreamingAnalysis && (
               <button
                 type="button"
                 onClick={() => actions.onAnalyze(message.id)}

@@ -76,9 +76,16 @@ const config: Config = {
   },
   safelist: [
     { pattern: /^(bg|text|border|ring|fill|stroke)-tremor-/ },
+    // Full Tremor color palette — charts need these classes generated so they
+    // don't render in grayscale.
     {
       pattern:
-        /^(bg|text|border|ring|fill|stroke)-(red|blue|green|yellow|indigo|purple|gray|slate)-(50|100|200|300|400|500|600|700|800|900)$/,
+        /^(bg|text|border|ring|fill|stroke)-(red|orange|amber|yellow|lime|green|emerald|teal|cyan|sky|blue|indigo|violet|purple|fuchsia|pink|rose|slate|gray|zinc|neutral|stone)-(50|100|200|300|400|500|600|700|800|900)$/,
+    },
+    // Gradient stops used by Tremor AreaChart fills.
+    {
+      pattern:
+        /^(from|via|to)-(red|orange|amber|yellow|lime|green|emerald|teal|cyan|sky|blue|indigo|violet|purple|fuchsia|pink|rose)-(50|100|200|300|400|500|600|700|800|900)$/,
     },
   ],
   plugins: [require("tailwindcss-animate")],

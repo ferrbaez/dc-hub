@@ -1,8 +1,12 @@
-# Willian's Hub
+# DC Hub
 
-Personal operations hub for BTC mining / data-center infrastructure.
-Consumes ICS (Postgres) and SCADA (SQL Server — AVEVA Edge) and adds custom modules
-for profitability, SLAs, and maintenance analytics.
+Operations platform for Penguin Digital's Data Center. Unifies ICS (Postgres)
+and SCADA (SQL Server — AVEVA Edge) behind typed APIs, and hosts modules built
+by Department Leaders using Claude Code.
+
+- **Core Keeper:** Willian Baez (Infrastructure Manager)
+- **Sponsor:** Ricardo Galeano (VP of DC Operations)
+- **Modular SOP:** see [`docs/MODULAR_SOP.md`](./docs/MODULAR_SOP.md)
 
 ## Requirements
 
@@ -42,9 +46,11 @@ Open http://localhost:3000.
 ## Project docs
 
 - [`CLAUDE.md`](./CLAUDE.md) — working instructions for Claude Code and project overview
+- [`docs/MODULAR_SOP.md`](./docs/MODULAR_SOP.md) — modular development SOP (roles, git flow, data rules, cadence)
 - [`docs/ARCHITECTURE.md`](./docs/ARCHITECTURE.md) — how the pieces fit together
 - [`docs/DATA_SOURCES.md`](./docs/DATA_SOURCES.md) — ICS and SCADA schemas, connection rules, query patterns
 - [`docs/ROADMAP.md`](./docs/ROADMAP.md) — living backlog of modules
+- [`docs/core-requests/`](./docs/core-requests/) — backlog of endpoints pedidos por owners
 - [`docs/schemas/`](./docs/schemas/) — full DDLs (`ics.sql`, `scada.sql`) and the dense `scada-summary.md` reference
 
 ## Safety notes

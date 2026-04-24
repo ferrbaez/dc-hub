@@ -21,37 +21,77 @@ export class AnalyticsError extends Error {
   }
 }
 
-// API-enforced JSON schema for SQL plan generation.
+// API-enforced JSON schema. Discriminated by `action`:
+//   - "execute"   → data_source + sql + rationale required, app runs it
+//   - "clarify"   → clarification + candidates + rationale required, user picks
 const SQL_PLAN_JSON_SCHEMA = {
   type: "object" as const,
   properties: {
+    action: {
+      type: "string" as const,
+      enum: ["execute", "clarify"] as const,
+      description:
+        "'execute' when you have an unambiguous SQL query. 'clarify' when the user's reference to an entity is ambiguous, data doesn't exist, or you need more info.",
+    },
     data_source: {
       type: "string" as const,
-      enum: ["ics", "scada", "local"] as const,
+      enum: ["ics", "scada", "local", "revenue_mara", "revenue_nd", "revenue_zp"] as const,
       description:
-        "Which database to query. 'ics' for mining ops (containers, hashrate, revenue, modulations). 'scada' for electrical/transformer sensors (Registros_*, H2Sense_*, Alimentadores). 'local' for our own cached chat / job data.",
+        "Only for action=execute. 'ics' mining ops source of truth, 'scada' electrical/transformer sensors, 'local' internal (users, chat, tariffs, machine_configs), 'revenue_mara' MARATHON revenue portal (projects JV2, JV3, OCEAN_MARA_GENERAL), 'revenue_nd' NORTHERN DATA (JV5), 'revenue_zp' ZPJV (JV1-1, JV1-2, JV4). Use revenue_* for daily/per-minute energy_consumption or pools_data queries.",
     },
     sql: {
       type: "string" as const,
       description:
-        "A single SELECT or WITH ... SELECT query. No semicolons in the middle, no comments, no trailing semicolon. PostgreSQL syntax for ICS/local, T-SQL for SCADA.",
+        "Only for action=execute. Single SELECT or WITH query. PostgreSQL for ICS/local, T-SQL for SCADA. No trailing semicolon, no comments, no middle-of-statement semicolons.",
     },
     rationale: {
       type: "string" as const,
-      description: "One or two sentences explaining why this query answers the user's question.",
+      description:
+        "Always required. 1-2 sentences: why this query answers the question, OR why the request is ambiguous.",
+    },
+    clarification: {
+      type: "string" as const,
+      description:
+        "Only for action=clarify. A short, friendly question in Spanish rioplatense asking the user to pick between canonical names or provide more info.",
+    },
+    candidates: {
+      type: "array" as const,
+      items: { type: "string" as const },
+      description:
+        "Only for action=clarify. Up to 6 canonical names (or short options) the UI will render as clickable buttons.",
     },
   },
-  required: ["data_source", "sql", "rationale"],
+  required: ["action", "rationale"],
   additionalProperties: false,
 };
 
-const sqlPlanSchema = z.object({
-  data_source: z.enum(["ics", "scada", "local"]),
-  sql: z.string().min(1),
-  rationale: z.string(),
-});
+const sqlPlanSchema = z
+  .object({
+    action: z.enum(["execute", "clarify"]),
+    data_source: z
+      .enum(["ics", "scada", "local", "revenue_mara", "revenue_nd", "revenue_zp"])
+      .optional(),
+    sql: z.string().optional(),
+    rationale: z.string(),
+    clarification: z.string().optional(),
+    candidates: z.array(z.string()).optional(),
+  })
+  .refine(
+    (d) =>
+      d.action === "clarify"
+        ? !!d.clarification && d.clarification.length > 0
+        : !!d.data_source && !!d.sql && d.sql.length > 0,
+    { message: "missing required fields for action" },
+  );
 
-export type SqlPlan = z.infer<typeof sqlPlanSchema>;
+export type PlanResult = z.infer<typeof sqlPlanSchema>;
+
+/** Narrow to an executable plan. Caller must check action first. */
+export type SqlPlan = {
+  data_source: "ics" | "scada" | "local" | "revenue_mara" | "revenue_nd" | "revenue_zp";
+  sql: string;
+  rationale: string;
+};
 
 export type TokenUsage = {
   inputTokens: number;
@@ -71,7 +111,7 @@ export function usageFromResponse(usage: Anthropic.Messages.Usage | undefined): 
   };
 }
 
-function parseJsonPlan(raw: string): SqlPlan {
+function parseJsonPlan(raw: string): PlanResult {
   let json: unknown;
   try {
     json = JSON.parse(raw);
@@ -85,7 +125,7 @@ function parseJsonPlan(raw: string): SqlPlan {
   if (!parsed.success) {
     throw new AnalyticsError(
       "PARSE_ERROR",
-      `schema mismatch: ${parsed.error.issues.map((i) => `${i.path.join(".") || "(root)"}: ${i.message}`).join("; ")}`,
+      `schema mismatch: ${parsed.error.issues.map((i) => `${i.path.join(".") || "(root)"}: ${i.message}`).join("; ")} — raw: ${JSON.stringify(json).slice(0, 500)}`,
     );
   }
   return parsed.data;
@@ -103,15 +143,15 @@ function handleAnthropicError(err: unknown): never {
 }
 
 /**
- * Generate a SQL plan from a natural-language question. Single Claude call
- * with adaptive thinking + high effort + schema in cache. No execution.
+ * Generate a plan from a natural-language question. Returns either an
+ * executable SQL plan OR a clarification request (discriminated by `action`).
  */
 export async function generatePlan(
   question: string,
   opts: { history?: ConversationTurn[] } = {},
-): Promise<{ plan: SqlPlan; usage: TokenUsage }> {
+): Promise<{ result: PlanResult; usage: TokenUsage }> {
   const client = getAnthropicClient();
-  const system = buildSqlSystemPrompt();
+  const system = await buildSqlSystemPrompt();
   const messages: Anthropic.MessageParam[] = (opts.history ?? []).map((h) => ({
     role: h.role,
     content: h.content,
@@ -121,11 +161,11 @@ export async function generatePlan(
   try {
     const response = await client.messages.create({
       model: MODELS.sql,
-      max_tokens: 16000,
+      max_tokens: 8192,
       system: [{ type: "text", text: system, cache_control: { type: "ephemeral" } }],
       messages,
-      thinking: { type: "adaptive" },
       output_config: {
+        effort: "medium",
         format: { type: "json_schema", schema: SQL_PLAN_JSON_SCHEMA },
       } as Anthropic.Messages.MessageCreateParams["output_config"],
     });
@@ -137,16 +177,24 @@ export async function generatePlan(
         `no text block from model (stop=${response.stop_reason})`,
       );
     }
-    return { plan: parseJsonPlan(textBlock.text), usage: usageFromResponse(response.usage) };
+    return { result: parseJsonPlan(textBlock.text), usage: usageFromResponse(response.usage) };
   } catch (err) {
     handleAnthropicError(err);
   }
 }
 
-/**
- * Run the planned SQL against the right DB. Throws on validation or
- * execution failure. Thin wrapper + SCADA safety.
- */
+export function asPlan(result: PlanResult): SqlPlan {
+  if (result.action !== "execute" || !result.data_source || !result.sql) {
+    throw new AnalyticsError("PARSE_ERROR", "result is not an executable plan");
+  }
+  return {
+    data_source: result.data_source,
+    sql: result.sql,
+    rationale: result.rationale,
+  };
+}
+
+/** Run the planned SQL against the right DB. */
 export async function runPlan(plan: SqlPlan): Promise<ExecutionResult> {
   try {
     validateSelectOnly(plan.sql);
@@ -160,34 +208,16 @@ export async function runPlan(plan: SqlPlan): Promise<ExecutionResult> {
   return executeQuery(plan.data_source as DataSource, plan.sql);
 }
 
-/**
- * Fast, narrative-only analysis of already-computed results. No adaptive
- * thinking; low effort. Designed to be cheap and called on-demand via a
- * "Analizar resultados" button.
- */
-export async function generateAnalysis(
-  question: string,
-  plan: SqlPlan,
-  result: ExecutionResult,
-): Promise<{ analysis: string; usage: TokenUsage }> {
-  const client = getAnthropicClient();
+const ANALYSIS_SYSTEM =
+  "Sos un analista de datos para una empresa de minería de Bitcoin / infraestructura. Escribí un análisis breve (2-4 oraciones) en español rioplatense sobre qué dicen los resultados. Podés usar markdown: **negritas** para números clave, y listas con guiones si ayuda. Mencioná valores notables, promedios, picos o anomalías. NO describas el SQL. Si hay 0 filas decilo explícitamente.";
+
+function buildAnalysisUserPrompt(question: string, plan: SqlPlan, result: ExecutionResult): string {
   const preview = result.rows.slice(0, 25);
   const extra =
     result.rows.length > preview.length
       ? ` (+ ${result.rows.length - preview.length} filas no mostradas)`
       : "";
-
-  try {
-    const response = await client.messages.create({
-      model: MODELS.analysis,
-      max_tokens: 1024,
-      output_config: { effort: "low" } as Anthropic.Messages.MessageCreateParams["output_config"],
-      system:
-        "Sos un analista de datos para una empresa de minería de Bitcoin / infraestructura. Escribí un análisis breve (2-4 oraciones) en español rioplatense sobre qué dicen los resultados. Podés usar markdown: **negritas** para números clave, y listas con guiones si ayuda. Mencioná valores notables, promedios, picos o anomalías. NO describas el SQL. Si hay 0 filas decilo explícitamente.",
-      messages: [
-        {
-          role: "user",
-          content: `Pregunta: ${question}
+  return `Pregunta: ${question}
 
 Base de datos: ${plan.data_source.toUpperCase()}
 SQL ejecutado:
@@ -198,9 +228,26 @@ ${plan.sql}
 Resultados (${result.rowCount} filas${result.truncated ? ", truncadas a 10000" : ""}):
 ${preview.length > 0 ? JSON.stringify(preview, null, 2) : "(sin filas)"}${extra}
 
-Escribí el análisis:`,
-        },
-      ],
+Escribí el análisis:`;
+}
+
+/**
+ * Fast narrative analysis of already-computed results. Effort=low, no thinking.
+ */
+export async function generateAnalysis(
+  question: string,
+  plan: SqlPlan,
+  result: ExecutionResult,
+): Promise<{ analysis: string; usage: TokenUsage }> {
+  const client = getAnthropicClient();
+
+  try {
+    const response = await client.messages.create({
+      model: MODELS.analysis,
+      max_tokens: 1024,
+      output_config: { effort: "low" } as Anthropic.Messages.MessageCreateParams["output_config"],
+      system: ANALYSIS_SYSTEM,
+      messages: [{ role: "user", content: buildAnalysisUserPrompt(question, plan, result) }],
     });
 
     const textBlock = response.content.find((b) => b.type === "text");
@@ -213,17 +260,65 @@ Escribí el análisis:`,
 }
 
 /**
- * Generate a SECOND, more analytical SQL query based on a previous question
- * and its result. Aggregations, percentiles, trends, outliers, joins — not
- * a trivial variation of the first query. Returns SQL only, NOT executed.
+ * Streaming variant. Returns an async iterator of text deltas plus a promise
+ * that resolves with the final text + usage when the stream ends.
+ */
+export async function streamAnalysis(
+  question: string,
+  plan: SqlPlan,
+  result: ExecutionResult,
+): Promise<{
+  deltas: AsyncIterable<string>;
+  final: Promise<{ analysis: string; usage: TokenUsage }>;
+}> {
+  const client = getAnthropicClient();
+
+  const stream = client.messages.stream({
+    model: MODELS.analysis,
+    max_tokens: 1024,
+    output_config: { effort: "low" } as Anthropic.Messages.MessageCreateParams["output_config"],
+    system: ANALYSIS_SYSTEM,
+    messages: [{ role: "user", content: buildAnalysisUserPrompt(question, plan, result) }],
+  });
+
+  async function* deltas() {
+    try {
+      for await (const event of stream) {
+        if (
+          event.type === "content_block_delta" &&
+          event.delta.type === "text_delta" &&
+          event.delta.text
+        ) {
+          yield event.delta.text;
+        }
+      }
+    } catch (err) {
+      handleAnthropicError(err);
+    }
+  }
+
+  const final = (async () => {
+    const msg = await stream.finalMessage();
+    const textBlock = msg.content.find((b) => b.type === "text");
+    const analysis =
+      textBlock && textBlock.type === "text" ? textBlock.text.trim() : "(sin análisis)";
+    return { analysis, usage: usageFromResponse(msg.usage) };
+  })();
+
+  return { deltas: deltas(), final };
+}
+
+/**
+ * Generate a deeper analytical follow-up SQL. Can also return a clarification
+ * if the follow-up direction is ambiguous.
  */
 export async function generateFollowupPlan(
   priorQuestion: string,
   priorPlan: SqlPlan,
   priorResult: ExecutionResult,
-): Promise<{ plan: SqlPlan; usage: TokenUsage }> {
+): Promise<{ result: PlanResult; usage: TokenUsage }> {
   const client = getAnthropicClient();
-  const system = buildSqlSystemPrompt();
+  const system = await buildSqlSystemPrompt();
 
   const preview = priorResult.rows.slice(0, 15);
   const userPrompt = `El usuario hizo esta pregunta:
@@ -244,18 +339,16 @@ ${preview.length > 0 ? JSON.stringify(preview, null, 2) : "(sin filas)"}
 
 ---
 
-Generá un SEGUNDO query SQL MÁS ANALÍTICO que profundice en estos datos. Ejemplos de buenas continuaciones:
-- Agregaciones o agrupamientos que no aparecen en el primer query
+Generá un SEGUNDO query SQL MÁS ANALÍTICO que profundice en estos datos. Buenas continuaciones:
+- Agregaciones / agrupamientos nuevos
 - Percentiles, desvío estándar, distribuciones
 - Tendencias temporales (por hora / día)
-- Outliers o top/bottom N con contexto
-- Joins con tablas relacionadas (ej: desde containers_details a projects o transformers)
+- Outliers, top/bottom N con contexto
+- Joins con tablas relacionadas
 - Comparaciones contra baselines históricos
 - Ratios o eficiencias derivadas (W/TH, kWh/m², etc.)
 
-Lo que NO sirve: la misma query con un LIMIT diferente, o sólo renombrar columnas. Tiene que agregar información nueva.
-
-Podés usar la misma base (${priorPlan.data_source}) u otra si tiene más sentido.`;
+Lo que NO sirve: la misma query con distinto LIMIT, o sólo renombrar columnas.`;
 
   try {
     const response = await client.messages.create({
@@ -276,7 +369,7 @@ Podés usar la misma base (${priorPlan.data_source}) u otra si tiene más sentid
         `no text block from model (stop=${response.stop_reason})`,
       );
     }
-    return { plan: parseJsonPlan(textBlock.text), usage: usageFromResponse(response.usage) };
+    return { result: parseJsonPlan(textBlock.text), usage: usageFromResponse(response.usage) };
   } catch (err) {
     handleAnthropicError(err);
   }

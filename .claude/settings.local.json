@@ -42,7 +42,24 @@
       "Bash(curl -s https://api.anthropic.com/v1/messages -H 'x-api-key: __CMDSUB_OUTPUT__' -H 'anthropic-version: 2023-06-01' -H 'content-type: application/json' -d '{\"model\":\"claude-sonnet-4-6\",\"max_tokens\":32,\"messages\":[{\"role\":\"user\",\"content\":\"Say hi in 3 words\"}]}')",
       "Bash(curl -s https://api.anthropic.com/v1/messages -H 'x-api-key: __CMDSUB_OUTPUT__' -H 'anthropic-version: 2023-06-01' -H 'content-type: application/json' -d '{\"model\":\"claude-haiku-4-5\",\"max_tokens\":32,\"messages\":[{\"role\":\"user\",\"content\":\"Say hi in 3 words\"}]}')",
       "Bash(python3 -c \"import json,sys; d=json.load\\(sys.stdin\\); print\\('exports keys:', list\\(d.get\\('exports', {}\\).keys\\(\\)\\)[:15]\\)\")",
-      "Bash(pnpm tsx *)"
+      "Bash(pnpm tsx *)",
+      "Bash(awk 'NR<=60' /private/tmp/claude-501/-Users-willianbaez-Documents-willians-hub/395c3c4a-4f2e-4ebb-a877-f64c96adc598/tasks/b7eiktjpn.output)",
+      "Bash(lsof -tnP -iTCP:3000 -sTCP:LISTEN)",
+      "Bash(mkdir -p /tmp/revenue_zip)",
+      "Bash(unzip -o -q \"/Users/willianbaez/Downloads/Revenue.zip\" -d /tmp/revenue_zip)",
+      "Bash(awk -F',' 'NR>1 {print $47}' \"/Users/willianbaez/Downloads/miners-penguin-digital-2026-04-21--11-39-34-ee56a420-1b29-463b-af0c-5382aef3e017.csv\")",
+      "Bash(python3 -c ' *)",
+      "Bash(python3 -c \"import openpyxl; print\\('openpyxl:', openpyxl.__version__\\)\")",
+      "Bash(python3 -c \"import pandas; print\\('pandas:', pandas.__version__\\)\")",
+      "Bash(pip3 install *)",
+      "Bash(python3 -c \"import openpyxl; print\\('ok'\\)\")",
+      "Bash(lsof -ti:3000)",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "Bash(chmod +x /Users/willianbaez/Documents/willians-hub/deploy.sh)",
+      "Bash(ssh -o StrictHostKeyChecking=accept-new -o ConnectTimeout=10 n8n@172.16.10.113 \"echo '=== OS ==='; cat /etc/os-release 2>/dev/null | head -6; uname -a; echo; echo '=== RESOURCES ==='; free -h | head -3; df -h / /opt 2>/dev/null; echo; echo '=== DOCKER ==='; which docker && docker --version; docker ps --format 'table {{.Names}}\\\\t{{.Image}}\\\\t{{.Ports}}\\\\t{{.Status}}' 2>/dev/null; echo; echo '=== NODE/PNPM/NGINX/PM2 ==='; which node && node --version 2>/dev/null; which pnpm && pnpm --version 2>/dev/null; which npm && npm --version 2>/dev/null; which nginx && nginx -v 2>&1; which pm2 && pm2 --version 2>/dev/null; echo; echo '=== LISTEN PORTS ==='; \\(ss -tlnp 2>/dev/null || netstat -tlnp 2>/dev/null\\) | head -30; echo; echo '=== SYSTEMD RUNNING SERVICES ==='; systemctl list-units --type=service --state=running --no-pager --no-legend 2>/dev/null | head -30; echo; echo '=== /opt CONTENTS ==='; ls -la /opt 2>/dev/null; echo; echo '=== HOME ==='; ls -la ~ 2>/dev/null\")",
+      "Bash(ping -c 2 -W 2 172.16.10.113)",
+      "Bash(nc -z -w 3 172.16.10.113 22)",
+      "Bash(nc -z -w 5 172.16.10.113 22)"
     ]
   }
 }

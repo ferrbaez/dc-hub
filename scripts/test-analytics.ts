@@ -7,6 +7,7 @@
  *   pnpm tsx --conditions=react-server --env-file=.env.local scripts/test-analytics.ts "your question"
  */
 import {
+  asPlan,
   generateAnalysis,
   generateFollowupPlan,
   generatePlan,
@@ -23,10 +24,22 @@ async function main() {
 
   // 1. Plan
   const t0 = Date.now();
-  const { plan, usage: planUsage } = await generatePlan(question);
+  const { result: planResult, usage: planUsage } = await generatePlan(question);
   process.stdout.write(`[generatePlan] ${Date.now() - t0} ms\n`);
+  process.stdout.write(`Action: ${planResult.action}\n`);
+  process.stdout.write(`Rationale: ${planResult.rationale}\n`);
+
+  if (planResult.action === "clarify") {
+    process.stdout.write(`\nCLARIFICATION: ${planResult.clarification}\n`);
+    process.stdout.write(`Candidates: ${(planResult.candidates ?? []).join(" | ")}\n`);
+    process.stdout.write(
+      `\nTokens: in=${planUsage.inputTokens} out=${planUsage.outputTokens} cache_read=${planUsage.cacheReadTokens} cache_write=${planUsage.cacheCreationTokens}\n`,
+    );
+    return;
+  }
+
+  const plan = asPlan(planResult);
   process.stdout.write(`Data source: ${plan.data_source}\n`);
-  process.stdout.write(`Rationale:   ${plan.rationale}\n`);
   process.stdout.write(`SQL:\n${plan.sql}\n\n`);
 
   // 2. Execute
@@ -47,14 +60,20 @@ async function main() {
 
   // 4. Follow-up SQL (more analytical)
   const t3 = Date.now();
-  const { plan: followup, usage: followupUsage } = await generateFollowupPlan(
+  const { result: followupResult, usage: followupUsage } = await generateFollowupPlan(
     question,
     plan,
     result,
   );
-  process.stdout.write(`[followup]     ${Date.now() - t3} ms\n`);
-  process.stdout.write(`Rationale: ${followup.rationale}\n`);
-  process.stdout.write(`SQL:\n${followup.sql}\n\n`);
+  process.stdout.write(`[followup]     ${Date.now() - t3} ms (action=${followupResult.action})\n`);
+  process.stdout.write(`Rationale: ${followupResult.rationale}\n`);
+  if (followupResult.action === "execute" && followupResult.sql) {
+    process.stdout.write(`SQL:\n${followupResult.sql}\n\n`);
+  } else if (followupResult.action === "clarify") {
+    process.stdout.write(
+      `CLARIFICATION: ${followupResult.clarification}\nCandidates: ${(followupResult.candidates ?? []).join(" | ")}\n\n`,
+    );
+  }
 
   const total = Date.now() - t0;
   process.stdout.write(

@@ -19,24 +19,9 @@ services:
       timeout: 5s
       retries: 5
 
-  n8n:
-    image: n8nio/n8n:latest
-    container_name: hub_n8n
-    env_file:
-      - .env.local
-    environment:
-      N8N_BASIC_AUTH_ACTIVE: "true"
-      N8N_HOST: localhost
-      N8N_PORT: 5678
-      N8N_PROTOCOL: http
-      GENERIC_TIMEZONE: America/Asuncion
-      TZ: America/Asuncion
-    ports:
-      - "5678:5678"
-    volumes:
-      - n8n_data:/home/node/.n8n
-    restart: unless-stopped
+  # n8n removed from this compose file. On the company server a shared n8n
+  # instance already runs at :5678 (managed separately). For local dev with
+  # n8n, spin it up manually via `docker run` or a personal compose file.
 
 volumes:
   local_db_data:
-  n8n_data:

@@ -45,8 +45,8 @@ pnpm db:push || echo "  (skip if no changes)"
 echo "▶ pnpm build"
 pnpm build
 
-echo "▶ Restarting docker services (timescale, n8n if managed here)"
-docker compose up -d --remove-orphans
+echo "▶ Restarting Timescale (local_db only; n8n runs standalone on this host)"
+docker compose up -d local_db
 
 if pm2 describe "$PM2_NAME" > /dev/null 2>&1; then
   echo "▶ pm2 reload $PM2_NAME"

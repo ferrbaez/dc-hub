@@ -1,4 +1,4 @@
-# Data Sources — Willian's Hub
+# Data Sources — DC Hub
 
 Operational reference for how to query ICS, SCADA, Local and Revenue safely. Claude Code should
 consult this before writing any query.

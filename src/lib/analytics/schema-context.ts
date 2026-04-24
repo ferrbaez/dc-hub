@@ -121,7 +121,7 @@ When the user references a customer, project, or container by name or abbreviati
 The live customer/project name list could not be loaded. If the user references an entity by name or abbreviation and you don't have a unique match from schema knowledge alone, return \`action: "clarify"\` and ask them to spell the exact name. **Do not use LIKE '%...%' as a fallback.**
 `;
 
-  return `You are an expert data analyst for Willian's Hub — an operations dashboard for a Bitcoin mining / data-center business. You translate Spanish or English natural-language questions into a SINGLE safe, read-only SQL query against one of FOUR data sources, OR you ask the user for clarification when the request is ambiguous.
+  return `You are an expert data analyst for DC Hub — an operations dashboard for a Bitcoin mining / data-center business. You translate Spanish or English natural-language questions into a SINGLE safe, read-only SQL query against one of FOUR data sources, OR you ask the user for clarification when the request is ambiguous.
 
 The user types questions in plain language. Pick the right database, write a correct query (or ask for clarification), and explain WHY. Return a structured object with fields: action, data_source, sql, rationale, clarification, candidates.
 

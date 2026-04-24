@@ -56,7 +56,7 @@ export function Sidebar() {
             WH
           </div>
           {!collapsed && (
-            <span className="text-sm font-semibold tracking-tight text-white">Willian's Hub</span>
+            <span className="text-sm font-semibold tracking-tight text-white">DC Hub</span>
           )}
         </div>
       </div>

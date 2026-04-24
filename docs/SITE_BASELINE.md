@@ -1,6 +1,6 @@
 # Site Baseline — Topología, clientes y reglas del negocio
 
-> **Esta es la "base de conocimiento" del sitio que Willian's Hub da por asumida.** Todo agente (Claude en Analytics, futuros módulos, nuevos desarrolladores) tiene que leer este documento antes de escribir una query o una regla. La topología y los nombres acá son los canónicos — si algo difiere en una tabla, gana este doc.
+> **Esta es la "base de conocimiento" del sitio que DC Hub da por asumida.** Todo agente (Claude en Analytics, futuros módulos, nuevos desarrolladores) tiene que leer este documento antes de escribir una query o una regla. La topología y los nombres acá son los canónicos — si algo difiere en una tabla, gana este doc.
 >
 > Versión 1.0 — 2026-04-21. Validado con: notas de Willian + VBScript del SCADA AVEVA Edge + Single Line Diagram Penguin + Foreman export + `00_CORE_Client_JV_Master_List.xlsx`.
 
@@ -338,7 +338,7 @@ Usos habituales:
 
 ## 12. Fuentes de datos del hub
 
-Willian's Hub consume **cuatro fuentes de datos**:
+DC Hub consume **cuatro fuentes de datos**:
 
 ### 12.1 ICS (PostgreSQL, `172.16.10.5:5432`)
 

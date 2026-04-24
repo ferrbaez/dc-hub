@@ -127,7 +127,7 @@ or stress it.
 ## Repo layout
 
 ```
-willians-hub/
+dc-hub/
 ├── CLAUDE.md                     # this file
 ├── README.md                     # human quickstart
 ├── docker-compose.yml

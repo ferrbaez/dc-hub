@@ -4,7 +4,7 @@ import { SessionProvider } from "next-auth/react";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Willian's Hub",
+  title: "DC Hub",
   description: "Operations hub for BTC mining and data-center infrastructure",
 };
 

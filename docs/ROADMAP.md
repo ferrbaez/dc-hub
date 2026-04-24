@@ -1,6 +1,6 @@
-# Roadmap — Willian's Hub
+# Roadmap — DC Hub
 
-A living backlog for Willian's Hub. **This is not a fixed timeline.** It's a backlog of modules and ideas. Willian
+A living backlog for DC Hub. **This is not a fixed timeline.** It's a backlog of modules and ideas. Willian
 picks what to build next based on current priorities. Claude Code does not assume
 the order.
 

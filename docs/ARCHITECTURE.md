@@ -1,8 +1,8 @@
-# Architecture — Willian's Hub
+# Architecture — DC Hub
 
 ## Principle
 
-ICS and SCADA are the source of truth. Willian's Hub reads them, cross-references
+ICS and SCADA are the source of truth. DC Hub reads them, cross-references
 them, caches selectively for performance, and adds custom analytics on top. It never
 becomes the system of record for operational data.
 

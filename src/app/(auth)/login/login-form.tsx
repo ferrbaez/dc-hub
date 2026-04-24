@@ -36,7 +36,7 @@ export function LoginForm() {
           WH
         </div>
         <div>
-          <h1 className="text-base font-semibold text-penguin-obsidian">Willian's Hub</h1>
+          <h1 className="text-base font-semibold text-penguin-obsidian">DC Hub</h1>
           <p className="text-xs text-penguin-cool-gray">Iniciar sesión para continuar</p>
         </div>
       </div>

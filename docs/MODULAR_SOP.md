@@ -459,7 +459,7 @@ Si tu módulo necesita un dato que el núcleo no expone:
 | Canal | Para qué | Quién |
 |---|---|---|
 | PRs en el repo | Cambios de código y core-requests | Todos |
-| Slack/Teams `#mindops-hub` | Preguntas rápidas, bugs, coordinación | Todos |
+| Slack/Teams `#dc-hub` | Preguntas rápidas, bugs, coordinación | Todos |
 | `docs/core-requests/` | Pedidos formales de endpoints | Module owners |
 | 1:1 Willian ↔ owner (semanal 20 min) | Desbloqueos arquitectónicos | Owner + Willian |
 

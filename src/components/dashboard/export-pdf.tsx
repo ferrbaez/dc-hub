@@ -29,7 +29,7 @@ function drawHeader(
   pdf.setTextColor(185, 253, 59); // penguin lime
   pdf.setFontSize(8);
   pdf.setFont("helvetica", "bold");
-  pdf.text("WILLIAN'S HUB", 32, 18);
+  pdf.text("DC HUB", 32, 18);
   pdf.setTextColor(255, 255, 255);
   pdf.setFontSize(13);
   pdf.text(title, 32, 35);
@@ -104,7 +104,7 @@ export async function exportPdfSnapshot(
       pdf.addImage(imgData, "JPEG", imgX, imgY, imgWidth, imgHeight);
 
       // Mask the area above contentTop to hide image overflow, then paint the
-      // WILLIAN'S HUB band on top of the mask.
+      // DC HUB band on top of the mask.
       pdf.setFillColor(255, 255, 255);
       pdf.rect(0, 0, pageWidth, contentTop, "F");
       drawHeader(pdf, title, subtitle, pageWidth, bandHeight, page, totalPages);
@@ -143,7 +143,7 @@ export async function exportPdf<T>(
   doc.setTextColor(185, 253, 59);
   doc.setFontSize(8);
   doc.setFont("helvetica", "bold");
-  doc.text("WILLIAN'S HUB", 32, 22);
+  doc.text("DC HUB", 32, 22);
   doc.setTextColor(255, 255, 255);
   doc.setFontSize(14);
   doc.text(title, 32, 40);

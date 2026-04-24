@@ -1,4 +1,4 @@
-# Willian's Hub — System Snapshot (2026-04-21)
+# DC Hub — System Snapshot (2026-04-21)
 
 Estado actual, imprimible en papel. Actualizado después de:
 Módulo 0 (scaffold) + Shell (Penguin) + Auth + Analytics chat + Clarificación.
@@ -405,7 +405,7 @@ Estados de un mensaje assistant:
 ## 8. File structure — lo que importa
 
 ```
-willians-hub/
+dc-hub/
 ├── CLAUDE.md                       ← tu referencia de reglas
 ├── docs/
 │   ├── ARCHITECTURE.md             ← diseño original (strategic)

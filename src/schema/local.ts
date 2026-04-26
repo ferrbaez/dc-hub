@@ -46,7 +46,6 @@ export const userAreas = pgTable(
   },
   (t) => ({
     pk: primaryKey({ columns: [t.userId, t.area] }),
-    byUser: index("idx_user_areas_user").on(t.userId),
   }),
 );
 

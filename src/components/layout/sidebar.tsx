@@ -41,46 +41,26 @@ export function Sidebar() {
 
       <nav className="flex-1 space-y-0.5 overflow-y-auto p-2">
         {items.map((item: NavItem) => {
-          const active = !item.disabled && pathname === item.href;
+          const active = pathname === item.href;
           const Icon = item.icon;
-          const baseClass = cn(
-            "group relative flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors",
-            collapsed && "justify-center px-0",
-            item.disabled
-              ? "cursor-not-allowed text-slate-600"
-              : active
-                ? "bg-penguin-obsidian-soft text-white"
-                : "text-slate-400 hover:bg-penguin-obsidian-soft/60 hover:text-white",
-          );
-          const content = (
-            <>
+          return (
+            <Link
+              key={item.href}
+              href={item.href}
+              className={cn(
+                "group relative flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors",
+                collapsed && "justify-center px-0",
+                active
+                  ? "bg-penguin-obsidian-soft text-white"
+                  : "text-slate-400 hover:bg-penguin-obsidian-soft/60 hover:text-white",
+              )}
+              title={collapsed ? item.label : undefined}
+            >
               {active && (
                 <span className="absolute inset-y-1 left-0 w-[3px] rounded-r-full bg-penguin-lime" />
               )}
               <Icon className={cn("h-4 w-4 shrink-0", active && "text-penguin-lime")} />
               {!collapsed && <span className="truncate">{item.label}</span>}
-              {!collapsed && item.disabled && (
-                <span className="ml-auto rounded-full bg-penguin-obsidian-soft/60 px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wider text-slate-500">
-                  Soon
-                </span>
-              )}
-            </>
-          );
-          if (item.disabled) {
-            return (
-              <div key={item.href} className={baseClass} title={collapsed ? item.label : undefined}>
-                {content}
-              </div>
-            );
-          }
-          return (
-            <Link
-              key={item.href}
-              href={item.href}
-              className={baseClass}
-              title={collapsed ? item.label : undefined}
-            >
-              {content}
             </Link>
           );
         })}

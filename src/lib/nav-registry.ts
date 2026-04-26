@@ -9,14 +9,11 @@
  */
 import type { AreaSlug } from "@/lib/areas";
 import {
-  BarChart3,
   LayoutDashboard,
   LineChart,
   type LucideIcon,
   MessageSquareText,
-  ShieldCheck,
-  Wrench,
-  Zap,
+  Wrench, // default icon used by `pnpm new:module` for generated entries
 } from "lucide-react";
 
 export type NavItem = {
@@ -25,25 +22,12 @@ export type NavItem = {
   icon: LucideIcon;
   /** If set, only users with this area (or admins) see the item. */
   requiredArea?: AreaSlug;
-  /** Placeholder entries shown greyed out — for not-yet-shipped modules. */
-  disabled?: boolean;
 };
 
 export const NAV_ITEMS: NavItem[] = [
   { href: "/", label: "Dashboard", icon: LayoutDashboard },
   { href: "/analytics", label: "Analytics", icon: MessageSquareText },
   { href: "/graficos", label: "Gráficos", icon: LineChart },
-  // Placeholders for future modules. Replace with the real entry when the module ships.
-  { href: "/rentabilidad", label: "Rentabilidad", icon: BarChart3, disabled: true },
-  { href: "/consumo", label: "Consumo", icon: Zap, disabled: true },
-  { href: "/slas", label: "SLAs", icon: ShieldCheck, disabled: true },
-  {
-    href: "/mantenimientos",
-    label: "Mantenimientos",
-    icon: Wrench,
-    disabled: true,
-    requiredArea: "maintenance",
-  },
   // <pnpm:new-module:nav-anchor> — do not remove. The generator inserts module nav items above this line.
 ];
 

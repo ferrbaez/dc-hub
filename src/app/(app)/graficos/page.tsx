@@ -148,18 +148,18 @@ export default function GraficosPage() {
   };
 
   // Real-time (no range dependency) — refresh with the auto-refresh interval.
-  const projects = trpc.site.projectsRollup.useQuery(undefined, common);
-  const tariffs = trpc.site.tariffAllocations.useQuery(undefined, {
+  const projects = trpc.core.site.projectsRollup.useQuery(undefined, common);
+  const tariffs = trpc.core.site.tariffAllocations.useQuery(undefined, {
     ...common,
     staleTime: 5 * 60_000,
   });
-  const weather = trpc.site.weatherLatest.useQuery(undefined, common);
-  const feeders = trpc.site.electrico.useQuery(undefined, common);
+  const weather = trpc.core.site.weatherLatest.useQuery(undefined, common);
+  const feeders = trpc.core.site.electrico.useQuery(undefined, common);
 
   // Range-dependent time series.
-  const powerWeather = trpc.site.timeseriesPowerWithWeather.useQuery({ hours }, common);
-  const pue = trpc.site.timeseriesPue.useQuery({ hours }, common);
-  const coolingTemp = trpc.site.timeseriesCooling.useQuery({ hours }, common);
+  const powerWeather = trpc.core.site.timeseriesPowerWithWeather.useQuery({ hours }, common);
+  const pue = trpc.core.site.timeseriesPue.useQuery({ hours }, common);
+  const coolingTemp = trpc.core.site.timeseriesCooling.useQuery({ hours }, common);
 
   // Derived KPIs
   const totalSitePowerKw = (feeders.data ?? []).reduce((acc, f) => acc + (f.kwNow ?? 0), 0);

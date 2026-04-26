@@ -108,8 +108,16 @@ modifica otro módulo.
 
 ### 2.1 Producción — servidor de la empresa (único)
 
-- **Qué corre ahí:** Next.js 15 + tRPC + NextAuth + Docker (TimescaleDB :5433,
-  n8n :5678) + scheduled jobs.
+- **Host:** `172.16.10.113` (cuenta `n8n`).
+- **Path:** `/opt/dc-hub` (clon del repo + `.env.local` de prod).
+- **Qué corre ahí:** Next.js 15 + tRPC + NextAuth servido por `pm2` (proceso
+  `dc-hub`), + Docker (`hub_local_db` TimescaleDB :5433, contenedor `n8n`
+  compartido :5678) + scheduled jobs.
+- **Deploy script:** `~n8n/deploy-hub.sh` (fuera del repo). Hace
+  `git fetch && git reset --hard origin/main`, `pnpm install --frozen-lockfile`,
+  `pnpm build`, `pm2 reload dc-hub` (o `pm2 start` la primera vez), curl al
+  healthcheck, exit. Si hay cambios de schema, antes de mergear a `main`
+  asegurate de correr `pnpm db:push` en el server (no es parte del deploy).
 - **Acceso SSH:** solo Willian (y una cuenta de servicio para deploy).
 - **Dominio interno:** a definir — ej. `hub.penguin.local` o IP directa.
 - **Es el único entorno "vivo".** No hay staging. No hace falta — es un sistema
@@ -142,8 +150,8 @@ Laptop del dev                GitHub/GitLab privado             Servidor prod
                                                            pm2 restart hub
 ```
 
-**Fase 1** (esta semana): **deploy manual** — Willian hace
-`ssh servidor && cd hub && ./deploy.sh` cuando corresponde. Cero magia.
+**Fase 1** (actual): **deploy manual** — Willian hace
+`ssh n8n@172.16.10.113 ~/deploy-hub.sh` cuando corresponde. Cero magia.
 
 **Fase 2** (cuando haya 3+ merges por semana): webhook en el remote → servidor
 pulea solo. No antes.
@@ -303,10 +311,11 @@ git push -u origin feat/reporting-pdf-diario
 Si algo rompe producción:
 
 ```bash
-ssh servidor
-cd /opt/hub
-git log --oneline -10          # ver últimos deploys
-./deploy.sh <commit-sha>       # redeploy a una versión previa
+ssh n8n@172.16.10.113
+cd /opt/dc-hub
+git log --oneline -10                        # ver últimos deploys
+git fetch origin && git reset --hard <sha>   # volver a versión previa
+pnpm install --frozen-lockfile && pnpm build && pm2 reload dc-hub
 ```
 
 Eso es todo. No hay blue/green, no hay nada más. Rollback manual y rápido.
@@ -512,29 +521,37 @@ Antes de pedir merge a `main`:
 
 **Servidor**
 
-- [ ] Provisionar VM / bare-metal en la red corporativa (4 vCPU, 8 GB RAM,
-      100 GB SSD arranca sobrado para esto).
-- [ ] Instalar Docker + Node 20 + pnpm + nginx + pm2.
-- [ ] Clonar repo en `/opt/hub`. Setear `.env` de producción.
-- [ ] `docker compose up -d timescale n8n`.
-- [ ] `pnpm install && pnpm build && pm2 start ecosystem.config.js`.
+- [x] VM aprovisionada en la red corporativa (`172.16.10.113`, cuenta `n8n`).
+- [x] Docker + Node 20 + pnpm + pm2 instalados (Node vía Linuxbrew, pnpm 9.15.0).
+- [x] Repo clonado en `/opt/dc-hub` con `.env.local` de prod.
+- [x] `docker compose up -d` (TimescaleDB :5433, n8n :5678 compartido).
+- [x] `pnpm install && pnpm build && pm2 start dc-hub`.
+- [x] Script de deploy en `~n8n/deploy-hub.sh` (idempotente, healthcheck final).
 - [ ] nginx reverse-proxy → `localhost:3000`, cert interno si aplica.
 - [ ] Probar acceso desde otra laptop de la red corporativa.
 
 **Repositorio**
 
-- [ ] Crear repo privado en el GitLab/GitHub corporativo.
-- [ ] Push inicial con todo el código actual de la VM.
-- [ ] Copiar este archivo como `CLAUDE.md` en la raíz.
-- [ ] Agregar `ARCHITECTURE.md`, `DATA_SOURCES.md`, `SITE_BASELINE.md`,
-      `SYSTEM_SNAPSHOT.md` a `docs/`.
-- [ ] Crear `docs/core-requests/.gitkeep`.
-- [ ] Crear `deploy.sh` (pull → install → build → pm2 reload) y commitearlo.
+- [x] Repo privado en GitHub corporativo (`github.com/ferrbaez/dc-hub`).
+- [x] Push inicial.
+- [x] `CLAUDE.md` en la raíz, `MODULAR_SOP.md`, `ARCHITECTURE.md`,
+      `DATA_SOURCES.md`, `SITE_BASELINE.md`, `SYSTEM_SNAPSHOT.md` en `docs/`.
+- [x] `docs/core-requests/README.md` con plantilla.
+- [x] CI en GitHub Actions (`typecheck + lint + module guards` en cada PR).
+- [x] CODEOWNERS — review de Willian obligatorio en núcleo / docs / gobernanza.
+- [x] Pre-commit hooks (`lefthook` + scripts de aislamiento de módulos).
+- [x] `pnpm new:module <area>/<nombre>` para scaffolding.
+- [x] Modelo de áreas (9 slugs) + `user_areas` m2m + `areaProcedure` para gating.
+- [ ] Activar branch protection en GitHub (1 review, status check `check`,
+      linear history, no force push). Requiere `gh auth login` o UI manual.
 
 **Cuentas y accesos**
 
 - [ ] Crear usuario en NextAuth para cada owner confirmado (Marcelo, Allan,
-      Alexis, Ronaldo, Carlos, Mario; Jorge pendiente de confirmación).
+      Alexis, Ronaldo, Carlos, Mario; Jorge pendiente de confirmación) con
+      `pnpm user:create` asignándoles las áreas que correspondan según el
+      organigrama (Heads cubren múltiples sub-áreas; Leaders/Técnicos solo
+      la suya).
 - [ ] Crear credenciales SSH del servidor para cuenta de deploy (solo Willian
       las conoce).
 - [ ] Confirmar acceso VPN para cada owner.

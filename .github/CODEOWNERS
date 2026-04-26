@@ -1,0 +1,42 @@
+# DC Hub — code ownership.
+# https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-security/managing-repository-settings/managing-rulesets-for-a-repository
+#
+# Default reviewer: Willian (Core Keeper). Each area's modules in src/modules/
+# are intentionally NOT listed here — owners merge their own area without
+# blocking on Willian.
+
+* @ferrbaez
+
+# Núcleo — siempre review de Willian.
+/src/server/                @ferrbaez
+/src/lib/db/                @ferrbaez
+/src/lib/auth.ts            @ferrbaez
+/src/lib/auth.config.ts     @ferrbaez
+/src/lib/areas.ts           @ferrbaez
+/src/lib/nav-registry.ts    @ferrbaez
+/src/schema/                @ferrbaez
+/src/middleware.ts          @ferrbaez
+/src/types/                 @ferrbaez
+
+# Tooling y gobernanza.
+/scripts/                   @ferrbaez
+/package.json               @ferrbaez
+/pnpm-lock.yaml             @ferrbaez
+/lefthook.yml               @ferrbaez
+/biome.json                 @ferrbaez
+/tsconfig.json              @ferrbaez
+/drizzle.config.ts          @ferrbaez
+/docker-compose.yml         @ferrbaez
+/deploy.sh                  @ferrbaez
+/.github/                   @ferrbaez
+
+# Docs centrales — Willian aprueba cambios al SOP y a la docs estructural.
+/CLAUDE.md                  @ferrbaez
+/README.md                  @ferrbaez
+/docs/MODULAR_SOP.md        @ferrbaez
+/docs/ARCHITECTURE.md       @ferrbaez
+/docs/DATA_SOURCES.md       @ferrbaez
+/docs/SITE_BASELINE.md      @ferrbaez
+/docs/SYSTEM_SNAPSHOT.md    @ferrbaez
+/docs/ROADMAP.md            @ferrbaez
+/docs/schemas/              @ferrbaez

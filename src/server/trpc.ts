@@ -1,4 +1,5 @@
 import { AnthropicConfigError } from "@/lib/anthropic";
+import type { AreaSlug } from "@/lib/areas";
 import { IcsConfigError, IcsUnreachableError } from "@/lib/db/ics";
 import { LocalDbUnreachableError } from "@/lib/db/local";
 import { RevenueConfigError, RevenueUnreachableError } from "@/lib/db/revenue";
@@ -72,3 +73,25 @@ export const protectedProcedure = t.procedure
       },
     });
   });
+
+/**
+ * Procedure that requires the user to have a specific area assigned.
+ * Admins (`role === "admin"`) bypass the area check.
+ *
+ * Use this in module routers (e.g. `src/modules/mining/<x>/router.ts`) so
+ * a user without that area gets a 403 from tRPC, regardless of UI state.
+ */
+export function areaProcedure(area: AreaSlug) {
+  return protectedProcedure.use(async ({ ctx, next }) => {
+    const user = ctx.session.user;
+    if (user.role === "admin") return next();
+    const areas = user.areas ?? [];
+    if (!areas.includes(area)) {
+      throw new TRPCError({
+        code: "FORBIDDEN",
+        message: `Acceso denegado: requiere área "${area}"`,
+      });
+    }
+    return next();
+  });
+}

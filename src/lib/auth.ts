@@ -1,5 +1,6 @@
+import { type AreaSlug, isAreaSlug } from "@/lib/areas";
 import { getLocalDb } from "@/lib/db/local";
-import { users } from "@/schema/local";
+import { userAreas, users } from "@/schema/local";
 import bcrypt from "bcryptjs";
 import { eq } from "drizzle-orm";
 import NextAuth from "next-auth";
@@ -35,11 +36,19 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           if (!user) return null;
           const ok = await bcrypt.compare(password, user.passwordHash);
           if (!ok) return null;
+          const areaRows = await db
+            .select({ area: userAreas.area })
+            .from(userAreas)
+            .where(eq(userAreas.userId, user.id));
+          const areas: AreaSlug[] = areaRows
+            .map((r) => r.area)
+            .filter((a): a is AreaSlug => isAreaSlug(a));
           return {
             id: String(user.id),
             email: user.email,
             name: user.displayName,
             role: user.role,
+            areas,
           };
         } catch (err) {
           console.error("[auth] authorize error:", err);

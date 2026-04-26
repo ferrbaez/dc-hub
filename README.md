@@ -43,6 +43,50 @@ pnpm dev
 
 Open http://localhost:3000.
 
+## Development workflow (module owners)
+
+Each owner builds modules under `src/modules/<area>/<nombre>/` against the
+protected `core.*` tRPC namespace. The full contract is in
+[`docs/MODULAR_SOP.md`](./docs/MODULAR_SOP.md). Quick reference:
+
+```bash
+# 0. create your dev user (interactive — asks email, name, password, areas)
+pnpm user:create
+
+# 1. start a feature branch off main
+git checkout main && git pull
+git checkout -b feat/<modulo>-<descripcion-corta>
+
+# 2. scaffold a new module (e.g. mining/reporting)
+pnpm new:module mining/reporting
+
+# 3. implement against core.* and your own router; restart pnpm dev to pick up the route
+pnpm dev
+
+# 4. before push: typecheck + lint (also runs in pre-commit and CI)
+pnpm typecheck && pnpm lint
+
+# 5. open PR; CODEOWNERS routes core/SOP changes to Willian automatically
+git push -u origin HEAD
+gh pr create --base main --assignee ferrbaez
+```
+
+Hard rules (enforced by `lefthook` pre-commit and `.github/workflows/ci.yml`):
+
+- **Modules are siloed.** A file under `src/modules/<area>/<modulo>/` may not
+  import from another module's folder. Share via `@/lib`, `@/components`, or
+  `@/server` (the core).
+- **No direct DB drivers outside `src/lib/db/`.** Modules consume `core.*`
+  endpoints — never `pg`, `mssql`, or Drizzle drivers directly.
+- **Need data the core doesn't expose?** Open a core-request: see
+  [`docs/core-requests/README.md`](./docs/core-requests/README.md). Don't
+  hardcode the query as a workaround.
+
+Areas (slugs used in `users.areas` and `areaProcedure`):
+`core`, `maintenance`, `substation`, `mining`, `networking`,
+`microelectronics`, `automation`, `facilities`, `safety`. See
+[`src/lib/areas.ts`](./src/lib/areas.ts).
+
 ## Project docs
 
 - [`CLAUDE.md`](./CLAUDE.md) — working instructions for Claude Code and project overview

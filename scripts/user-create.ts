@@ -10,8 +10,9 @@ import readline from "node:readline/promises";
  */
 import bcrypt from "bcryptjs";
 import { eq } from "drizzle-orm";
+import { AREA_SLUGS, type AreaSlug, isAreaSlug } from "../src/lib/areas";
 import { getLocalDb, getLocalPool } from "../src/lib/db/local";
-import { users } from "../src/schema/local";
+import { userAreas, users } from "../src/schema/local";
 
 type ReadlineWithWriter = readline.Interface & {
   _writeToOutput?: (s: string) => void;
@@ -37,6 +38,18 @@ async function promptSilent(rl: readline.Interface, q: string): Promise<string> 
     masking = false;
     rlAny._writeToOutput = original;
   }
+}
+
+function parseAreaList(raw: string): AreaSlug[] {
+  const tokens = raw
+    .split(/[\s,]+/)
+    .map((t) => t.trim().toLowerCase())
+    .filter(Boolean);
+  const invalid = tokens.filter((t) => !isAreaSlug(t));
+  if (invalid.length > 0) {
+    throw new Error(`Áreas inválidas: ${invalid.join(", ")}. Válidas: ${AREA_SLUGS.join(", ")}`);
+  }
+  return Array.from(new Set(tokens as AreaSlug[]));
 }
 
 async function main() {
@@ -67,14 +80,30 @@ async function main() {
     const roleInput = (await rl.question("Rol (admin/user) [user]: ")).trim().toLowerCase();
     const role = roleInput === "admin" ? "admin" : "user";
 
+    let areas: AreaSlug[];
+    if (role === "admin") {
+      areas = ["core"];
+      stdout.write("→ Admin: áreas asignadas automáticamente: core (admin bypassa el check)\n");
+    } else {
+      stdout.write(`Áreas válidas: ${AREA_SLUGS.join(", ")}\n`);
+      const areasRaw = (await rl.question("Áreas (separadas por coma o espacio): ")).trim();
+      if (!areasRaw) throw new Error("Debés asignar al menos un área a un usuario no-admin");
+      areas = parseAreaList(areasRaw);
+      if (areas.length === 0) throw new Error("Debés asignar al menos un área");
+    }
+
     const passwordHash = await bcrypt.hash(password, 12);
     const [created] = await db
       .insert(users)
       .values({ email, displayName, passwordHash, role })
       .returning({ id: users.id, email: users.email, role: users.role });
 
+    if (!created) throw new Error("No se pudo crear el usuario");
+
+    await db.insert(userAreas).values(areas.map((area) => ({ userId: created.id, area })));
+
     stdout.write(
-      `\n✔ Usuario creado: ${created?.email} · rol ${created?.role} · id ${created?.id}\n`,
+      `\n✔ Usuario creado: ${created.email} · rol ${created.role} · áreas: ${areas.join(", ")} · id ${created.id}\n`,
     );
   } finally {
     rl.close();

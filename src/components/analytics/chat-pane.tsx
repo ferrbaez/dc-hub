@@ -94,19 +94,19 @@ export function ChatPane({ conversationId }: { conversationId: string | null }) 
   const [runningId, setRunningId] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  const conversation = trpc.chat.conversations.get.useQuery(
+  const conversation = trpc.core.chat.conversations.get.useQuery(
     { id: conversationId ?? "" },
     { enabled: !!conversationId },
   );
 
   const invalidate = () => {
     if (conversationId) {
-      utils.chat.conversations.get.invalidate({ id: conversationId });
-      utils.chat.conversations.list.invalidate();
+      utils.core.chat.conversations.get.invalidate({ id: conversationId });
+      utils.core.chat.conversations.list.invalidate();
     }
   };
 
-  const ask = trpc.chat.ask.useMutation({
+  const ask = trpc.core.chat.ask.useMutation({
     onSuccess: (res) => {
       setPending(null);
       setSubmitError(null);
@@ -165,7 +165,7 @@ export function ChatPane({ conversationId }: { conversationId: string | null }) 
     }
   }
 
-  const followupMut = trpc.chat.followup.useMutation({
+  const followupMut = trpc.core.chat.followup.useMutation({
     onSuccess: () => {
       setFollowingUpId(null);
       invalidate();
@@ -176,7 +176,7 @@ export function ChatPane({ conversationId }: { conversationId: string | null }) 
     },
   });
 
-  const runMut = trpc.chat.runSql.useMutation({
+  const runMut = trpc.core.chat.runSql.useMutation({
     onSuccess: () => {
       setRunningId(null);
       invalidate();

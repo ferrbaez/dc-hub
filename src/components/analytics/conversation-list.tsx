@@ -21,10 +21,10 @@ function formatRelative(date: Date) {
 export function ConversationList({ activeId }: { activeId: string | null }) {
   const router = useRouter();
   const utils = trpc.useUtils();
-  const { data: conversations, isLoading } = trpc.chat.conversations.list.useQuery();
-  const deleteMutation = trpc.chat.conversations.delete.useMutation({
+  const { data: conversations, isLoading } = trpc.core.chat.conversations.list.useQuery();
+  const deleteMutation = trpc.core.chat.conversations.delete.useMutation({
     onSuccess: () => {
-      utils.chat.conversations.list.invalidate();
+      utils.core.chat.conversations.list.invalidate();
     },
   });
 

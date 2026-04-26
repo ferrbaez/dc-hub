@@ -90,6 +90,7 @@ Areas (slugs used in `users.areas` and `areaProcedure`):
 ## Project docs
 
 - [`CLAUDE.md`](./CLAUDE.md) — working instructions for Claude Code and project overview
+- [`docs/PARA_OWNERS.md`](./docs/PARA_OWNERS.md) — guía rápida no-técnica para owners (leer primero)
 - [`docs/MODULAR_SOP.md`](./docs/MODULAR_SOP.md) — modular development SOP (roles, git flow, data rules, cadence)
 - [`docs/ARCHITECTURE.md`](./docs/ARCHITECTURE.md) — how the pieces fit together
 - [`docs/DATA_SOURCES.md`](./docs/DATA_SOURCES.md) — ICS and SCADA schemas, connection rules, query patterns

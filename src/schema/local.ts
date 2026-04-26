@@ -12,6 +12,7 @@ import {
   jsonb,
   numeric,
   pgTable,
+  primaryKey,
   text,
   timestamp,
 } from "drizzle-orm/pg-core";
@@ -25,6 +26,29 @@ export const users = pgTable("users", {
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
 });
+
+/**
+ * Many-to-many between users and area slugs (see `src/lib/areas.ts`).
+ * Heads of department typically have multiple rows here (e.g. Allan covers
+ * mining + networking + microelectronics + automation).
+ *
+ * The enum is enforced in app code, not in the DB, to make migrations easier
+ * when a new area is added.
+ */
+export const userAreas = pgTable(
+  "user_areas",
+  {
+    userId: bigint("user_id", { mode: "bigint" })
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    area: text("area").notNull(), // AreaSlug — see src/lib/areas.ts
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  },
+  (t) => ({
+    pk: primaryKey({ columns: [t.userId, t.area] }),
+    byUser: index("idx_user_areas_user").on(t.userId),
+  }),
+);
 
 export const chatConversations = pgTable(
   "chat_conversations",

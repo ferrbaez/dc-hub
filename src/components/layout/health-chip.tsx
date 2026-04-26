@@ -17,7 +17,7 @@ const SOURCE_LABEL: Record<string, string> = {
 };
 
 export function HealthChip() {
-  const { data, isLoading } = trpc.health.all.useQuery(undefined, {
+  const { data, isLoading } = trpc.core.health.all.useQuery(undefined, {
     refetchInterval: 120_000,
     refetchOnWindowFocus: false,
   });

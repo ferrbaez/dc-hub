@@ -1,0 +1,18 @@
+# Lefthook config — runs on every commit.
+# Install hooks once after cloning: `pnpm install` will trigger postinstall,
+# which calls `lefthook install`. To skip in an emergency:
+#   LEFTHOOK=0 git commit ...   (use sparingly — CI also runs these checks)
+
+pre-commit:
+  parallel: true
+  commands:
+    typecheck:
+      run: pnpm typecheck
+    lint:
+      run: pnpm lint
+    no-cross-module-imports:
+      glob: "src/modules/**/*.{ts,tsx}"
+      run: scripts/check-module-isolation.sh {staged_files}
+    no-direct-db:
+      glob: "src/**/*.{ts,tsx}"
+      run: scripts/check-no-direct-db.sh {staged_files}

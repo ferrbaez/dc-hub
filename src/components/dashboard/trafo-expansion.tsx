@@ -37,7 +37,7 @@ function chassisTempTone(t: number | null) {
 }
 
 export function TrafoExpansion({ feeder }: { feeder: string }) {
-  const trafos = trpc.site.trafosForFeeder.useQuery(
+  const trafos = trpc.core.site.trafosForFeeder.useQuery(
     { feeder },
     { refetchOnWindowFocus: false, staleTime: 60_000 },
   );

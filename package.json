@@ -18,7 +18,10 @@
     "db:studio": "drizzle-kit studio",
     "db:generate": "drizzle-kit generate",
     "healthcheck": "tsx --conditions=react-server --env-file=.env.local scripts/healthcheck.ts",
-    "user:create": "tsx --conditions=react-server --env-file=.env.local scripts/user-create.ts"
+    "user:create": "tsx --conditions=react-server --env-file=.env.local scripts/user-create.ts",
+    "new:module": "tsx scripts/new-module.ts",
+    "modules:rebuild": "tsx scripts/modules-rebuild.ts",
+    "prepare": "lefthook install || true"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.90.0",
@@ -57,6 +60,7 @@
     "@types/react-dom": "^18.3.1",
     "autoprefixer": "^10.4.20",
     "drizzle-kit": "^0.28.1",
+    "lefthook": "^1.7.22",
     "postcss": "^8.4.47",
     "tailwindcss": "^3.4.14",
     "tailwindcss-animate": "^1.0.7",

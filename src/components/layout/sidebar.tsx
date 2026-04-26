@@ -1,42 +1,20 @@
 "use client";
 
 import { useLocalStorage } from "@/hooks/use-local-storage";
+import { type NavItem, visibleNavItems } from "@/lib/nav-registry";
 import { cn } from "@/lib/utils";
-import {
-  BarChart3,
-  ChevronsLeft,
-  ChevronsRight,
-  LayoutDashboard,
-  LineChart,
-  type LucideIcon,
-  MessageSquareText,
-  ShieldCheck,
-  Wrench,
-  Zap,
-} from "lucide-react";
+import { ChevronsLeft, ChevronsRight } from "lucide-react";
+import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-
-type NavItem = {
-  href: string;
-  label: string;
-  icon: LucideIcon;
-  disabled?: boolean;
-};
-
-const NAV: NavItem[] = [
-  { href: "/", label: "Dashboard", icon: LayoutDashboard },
-  { href: "/analytics", label: "Analytics", icon: MessageSquareText },
-  { href: "/graficos", label: "Gráficos", icon: LineChart },
-  { href: "/rentabilidad", label: "Rentabilidad", icon: BarChart3, disabled: true },
-  { href: "/consumo", label: "Consumo", icon: Zap, disabled: true },
-  { href: "/slas", label: "SLAs", icon: ShieldCheck, disabled: true },
-  { href: "/mantenimientos", label: "Mantenimientos", icon: Wrench, disabled: true },
-];
 
 export function Sidebar() {
   const [collapsed, setCollapsed] = useLocalStorage<boolean>("hub:sidebar-collapsed", false);
   const pathname = usePathname();
+  const session = useSession();
+  const role = session.data?.user.role;
+  const areas = session.data?.user.areas ?? [];
+  const items = visibleNavItems({ role, areas });
 
   return (
     <aside
@@ -62,7 +40,7 @@ export function Sidebar() {
       </div>
 
       <nav className="flex-1 space-y-0.5 overflow-y-auto p-2">
-        {NAV.map((item) => {
+        {items.map((item: NavItem) => {
           const active = !item.disabled && pathname === item.href;
           const Icon = item.icon;
           const baseClass = cn(

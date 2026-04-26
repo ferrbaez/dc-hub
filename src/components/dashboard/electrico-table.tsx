@@ -140,7 +140,7 @@ function TriPhaseCell({
 
 export function ElectricoTable() {
   const { intervalMs } = useAutoRefresh();
-  const electrico = trpc.site.electrico.useQuery(undefined, {
+  const electrico = trpc.core.site.electrico.useQuery(undefined, {
     refetchOnWindowFocus: false,
     refetchInterval: intervalMs,
   });

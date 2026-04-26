@@ -256,7 +256,7 @@ const COOLING_CSV_COLUMNS: CsvColumn<CoolingCsvRow>[] = [
 
 export function CoolingTable() {
   const { intervalMs } = useAutoRefresh();
-  const cooling = trpc.site.cooling.useQuery(undefined, {
+  const cooling = trpc.core.site.cooling.useQuery(undefined, {
     refetchOnWindowFocus: false,
     refetchInterval: intervalMs,
   });

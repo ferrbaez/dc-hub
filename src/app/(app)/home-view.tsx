@@ -87,18 +87,18 @@ export function HomeView() {
   const viewParam = searchParams.get("view") as View | null;
   const activeView: View = VIEWS.includes(viewParam as View) ? (viewParam as View) : "produccion";
 
-  const containers = trpc.containers.list.useQuery(undefined, {
+  const containers = trpc.core.containers.list.useQuery(undefined, {
     refetchOnWindowFocus: false,
     refetchInterval: intervalMs,
   });
-  const electrico = trpc.site.electrico.useQuery(undefined, {
+  const electrico = trpc.core.site.electrico.useQuery(undefined, {
     refetchOnWindowFocus: false,
     // Only actively refresh when Eléctrico is showing. Other views get a
     // stale snapshot for the summary stat without polling.
     refetchInterval: activeView === "electrico" ? intervalMs : false,
     staleTime: 30_000,
   });
-  const cooling = trpc.site.cooling.useQuery(undefined, {
+  const cooling = trpc.core.site.cooling.useQuery(undefined, {
     refetchOnWindowFocus: false,
     refetchInterval: activeView === "cooling" ? intervalMs : false,
     staleTime: 30_000,

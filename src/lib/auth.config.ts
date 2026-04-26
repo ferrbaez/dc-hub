@@ -4,6 +4,7 @@
  * The full config (with Credentials provider + DB access) lives in
  * `auth.ts` and is Node-only.
  */
+import type { AreaSlug } from "@/lib/areas";
 import type { NextAuthConfig } from "next-auth";
 
 export const authConfig = {
@@ -21,14 +22,18 @@ export const authConfig = {
     },
     jwt({ token, user }) {
       if (user) {
-        token.role = (user as { role?: string }).role;
+        const u = user as { role?: string; areas?: AreaSlug[] };
+        (token as { role?: string }).role = u.role;
+        (token as { areas?: AreaSlug[] }).areas = u.areas ?? [];
       }
       return token;
     },
     session({ session, token }) {
       if (session.user) {
         if (token.sub) session.user.id = token.sub;
-        (session.user as { role?: string }).role = token.role as string | undefined;
+        const t = token as { role?: string; areas?: AreaSlug[] };
+        session.user.role = t.role;
+        session.user.areas = t.areas ?? [];
       }
       return session;
     },

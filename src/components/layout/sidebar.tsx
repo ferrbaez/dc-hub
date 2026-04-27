@@ -12,9 +12,11 @@ export function Sidebar() {
   const [collapsed, setCollapsed] = useLocalStorage<boolean>("hub:sidebar-collapsed", false);
   const pathname = usePathname();
   const session = useSession();
-  const role = session.data?.user.role;
-  const areas = session.data?.user.areas ?? [];
-  const items = visibleNavItems({ role, areas });
+  const items = visibleNavItems({
+    role: session.data?.user.role,
+    areas: session.data?.user.areas ?? [],
+    moduleGrants: session.data?.user.moduleGrants ?? [],
+  });
 
   return (
     <aside

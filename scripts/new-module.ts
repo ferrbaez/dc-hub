@@ -37,10 +37,17 @@ async function appendNavEntry(area: AreaSlug, folder: string, label: string) {
     );
     return;
   }
-  // The anchor lives on a line indented by 2 spaces; the preceding indentation
-  // is preserved by `replace`, so the new line itself starts at column 0.
-  const newLine = `{ href: "/m/${area}/${folder}", label: ${JSON.stringify(label)}, icon: Wrench, requiredArea: "${area}" },\n  `;
-  const updated = src.replace(anchor, `${newLine}${anchor}`);
+  // Emit multi-line so Biome's formatter doesn't flag it. Indentation is
+  // 2 spaces (matches the anchor's existing indentation, preserved by replace).
+  const newEntry = `{
+    href: "/m/${area}/${folder}",
+    label: ${JSON.stringify(label)},
+    icon: Wrench,
+    requiredArea: "${area}",
+    moduleSlug: "${area}/${folder}",
+  },
+  `;
+  const updated = src.replace(anchor, `${newEntry}${anchor}`);
   await fs.writeFile(NAV_REGISTRY, updated);
 }
 
@@ -132,7 +139,17 @@ export const slug = "${area}.${key}" as const;
 const TYPES_TEMPLATE = "export {};\n";
 
 const PAGE_REEXPORT_TEMPLATE = (area: AreaSlug, folder: string) =>
-  `export { default } from "@/modules/${area}/${folder}/routes";\n`;
+  `import { RequireModuleAccess } from "@/components/access/require-module-access";
+import ModulePage from "@/modules/${area}/${folder}/routes";
+
+export default function Page() {
+  return (
+    <RequireModuleAccess area="${area}" modulo="${folder}">
+      <ModulePage />
+    </RequireModuleAccess>
+  );
+}
+`;
 
 async function main() {
   const arg = process.argv[2];

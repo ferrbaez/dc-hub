@@ -10,6 +10,7 @@
  *  2. Register it in the `coreRouter` below.
  *  3. Document it in `docs/MODULAR_SOP.md` §7.2.
  */
+import { adminRouter } from "@/server/routers/core/admin";
 import { chatRouter } from "@/server/routers/core/chat";
 import { containersRouter } from "@/server/routers/core/containers";
 import { healthRouter } from "@/server/routers/core/health";
@@ -21,4 +22,5 @@ export const coreRouter = router({
   health: healthRouter,
   chat: chatRouter,
   site: siteRouter,
+  admin: adminRouter,
 });

@@ -7,11 +7,13 @@ declare module "next-auth" {
       id: string;
       role?: string;
       areas: AreaSlug[];
+      moduleGrants: string[];
     } & DefaultSession["user"];
   }
   interface User {
     role?: string;
     areas?: AreaSlug[];
+    moduleGrants?: string[];
   }
 }
 
@@ -19,5 +21,6 @@ declare module "next-auth/jwt" {
   interface JWT {
     role?: string;
     areas?: AreaSlug[];
+    moduleGrants?: string[];
   }
 }

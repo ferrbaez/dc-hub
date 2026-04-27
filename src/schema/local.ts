@@ -32,6 +32,11 @@ export const users = pgTable("users", {
  * Heads of department typically have multiple rows here (e.g. Allan covers
  * mining + networking + microelectronics + automation).
  *
+ * `mode` distinguishes a user who develops in this area (`dev`) from one
+ * with read-only access (`viewer`). At runtime, both pass the area check
+ * — the distinction is semantic and used for CODEOWNERS automation later
+ * and the admin UI labelling.
+ *
  * The enum is enforced in app code, not in the DB, to make migrations easier
  * when a new area is added.
  */
@@ -42,10 +47,44 @@ export const userAreas = pgTable(
       .notNull()
       .references(() => users.id, { onDelete: "cascade" }),
     area: text("area").notNull(), // AreaSlug — see src/lib/areas.ts
+    mode: text("mode").notNull().default("dev"), // 'dev' | 'viewer'
+    grantedBy: bigint("granted_by", { mode: "bigint" }).references(() => users.id, {
+      onDelete: "set null",
+    }),
+    grantedAt: timestamp("granted_at", { withTimezone: true }).defaultNow().notNull(),
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
   },
   (t) => ({
     pk: primaryKey({ columns: [t.userId, t.area] }),
+  }),
+);
+
+/**
+ * Per-module explicit grants for users outside the module's area.
+ * Use case: give a user UI + endpoint access to ONE module without
+ * granting them the whole area (e.g. Ricardo VP sees only Rentabilidad).
+ *
+ * `module_slug` format: `<area>/<modulo>`, e.g. `mining/efficiency`.
+ *
+ * Runtime: a user with a grant for `mining/efficiency` passes the area
+ * check for `mining` (broad — they can call any endpoint that requires
+ * mining), but the sidebar only shows the granted module, not the rest
+ * of mining's modules.
+ */
+export const userModuleGrants = pgTable(
+  "user_module_grants",
+  {
+    userId: bigint("user_id", { mode: "bigint" })
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    moduleSlug: text("module_slug").notNull(), // "<area>/<modulo>"
+    grantedBy: bigint("granted_by", { mode: "bigint" }).references(() => users.id, {
+      onDelete: "set null",
+    }),
+    grantedAt: timestamp("granted_at", { withTimezone: true }).defaultNow().notNull(),
+  },
+  (t) => ({
+    pk: primaryKey({ columns: [t.userId, t.moduleSlug] }),
   }),
 );
 

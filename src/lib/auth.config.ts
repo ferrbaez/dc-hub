@@ -10,8 +10,8 @@ import type { JWT } from "next-auth/jwt";
 
 // NextAuthConfig types `token` more loosely than our augmented JWT in
 // `next-auth.d.ts`, so we narrow it locally. Same for `user` in jwt callback.
-type AppToken = JWT & { role?: string; areas?: AreaSlug[] };
-type AppUser = { role?: string; areas?: AreaSlug[] };
+type AppToken = JWT & { role?: string; areas?: AreaSlug[]; moduleGrants?: string[] };
+type AppUser = { role?: string; areas?: AreaSlug[]; moduleGrants?: string[] };
 
 export const authConfig = {
   pages: { signIn: "/login" },
@@ -32,6 +32,7 @@ export const authConfig = {
         const t = token as AppToken;
         t.role = u.role;
         t.areas = u.areas ?? [];
+        t.moduleGrants = u.moduleGrants ?? [];
       }
       return token;
     },
@@ -41,6 +42,7 @@ export const authConfig = {
         if (t.sub) session.user.id = t.sub;
         session.user.role = t.role;
         session.user.areas = t.areas ?? [];
+        session.user.moduleGrants = t.moduleGrants ?? [];
       }
       return session;
     },

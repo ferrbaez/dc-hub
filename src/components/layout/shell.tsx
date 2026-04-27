@@ -8,7 +8,7 @@ import { Sidebar } from "./sidebar";
 export function Shell({ children }: { children: ReactNode }) {
   return (
     <AutoRefreshProvider>
-      <div className="flex min-h-screen bg-slate-50 text-slate-900">
+      <div className="flex min-h-screen bg-background text-foreground theme-transition">
         <Sidebar />
         <div className="flex min-w-0 flex-1 flex-col">
           <Header />

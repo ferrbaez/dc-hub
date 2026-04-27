@@ -33,7 +33,7 @@ export function EndpointsAdmin() {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between gap-3">
-        <p className="text-sm text-slate-600">
+        <p className="text-sm text-content-soft">
           {endpointsQuery.data
             ? `${filtered.length} de ${endpointsQuery.data.length} endpoint(s)`
             : "Cargando..."}
@@ -43,13 +43,13 @@ export function EndpointsAdmin() {
           placeholder="Filtrar por path, área o descripción"
           value={filter}
           onChange={(e) => setFilter(e.target.value)}
-          className="h-8 w-72 rounded-md border border-slate-200 px-3 text-sm focus:border-penguin-violet focus:outline-none focus:ring-1 focus:ring-penguin-violet/40"
+          className="h-8 w-72 rounded-md border border-surface-border px-3 text-sm focus:border-penguin-violet focus:outline-none focus:ring-1 focus:ring-penguin-violet/40"
         />
       </div>
 
-      <div className="overflow-hidden rounded-lg border border-slate-200 bg-white">
+      <div className="overflow-hidden rounded-lg border border-surface-border bg-surface">
         <table className="w-full text-sm">
-          <thead className="bg-slate-50 text-left text-xs uppercase tracking-wider text-slate-500">
+          <thead className="bg-surface-soft text-left text-xs uppercase tracking-wider text-content-muted">
             <tr>
               <th className="px-3 py-2 font-medium">Path</th>
               <th className="px-3 py-2 font-medium">Tipo</th>
@@ -58,9 +58,9 @@ export function EndpointsAdmin() {
               <th className="px-3 py-2 font-medium" />
             </tr>
           </thead>
-          <tbody className="divide-y divide-slate-100">
+          <tbody className="divide-y divide-surface-border">
             {filtered.map((e) => (
-              <tr key={e.path} className="hover:bg-slate-50">
+              <tr key={e.path} className="hover:bg-surface-soft">
                 <td className="px-3 py-2 font-mono text-xs">{e.path}</td>
                 <td className="px-3 py-2">
                   <span
@@ -75,7 +75,7 @@ export function EndpointsAdmin() {
                 </td>
                 <td className="px-3 py-2">
                   {e.areas.length === 0 ? (
-                    <span className="text-xs text-slate-400">cualquier user logueado</span>
+                    <span className="text-xs text-content-muted">cualquier user logueado</span>
                   ) : (
                     <div className="flex flex-wrap gap-1">
                       {e.areas.map((a) => (
@@ -89,12 +89,12 @@ export function EndpointsAdmin() {
                     </div>
                   )}
                 </td>
-                <td className="px-3 py-2 text-slate-700">{e.description ?? "—"}</td>
+                <td className="px-3 py-2 text-content">{e.description ?? "—"}</td>
                 <td className="px-3 py-2 text-right">
                   <button
                     type="button"
                     onClick={() => copyExample(e)}
-                    className="rounded p-1.5 text-slate-500 hover:bg-slate-100 hover:text-penguin-obsidian"
+                    className="rounded p-1.5 text-content-muted hover:bg-surface-muted hover:text-content"
                     title="Copiar uso"
                   >
                     {copied === e.path ? (
@@ -108,14 +108,14 @@ export function EndpointsAdmin() {
             ))}
             {endpointsQuery.isLoading && (
               <tr>
-                <td colSpan={5} className="px-3 py-8 text-center text-slate-400">
+                <td colSpan={5} className="px-3 py-8 text-center text-content-muted">
                   <Loader2 className="mx-auto h-4 w-4 animate-spin" />
                 </td>
               </tr>
             )}
             {!endpointsQuery.isLoading && filtered.length === 0 && (
               <tr>
-                <td colSpan={5} className="px-3 py-8 text-center text-sm text-slate-400">
+                <td colSpan={5} className="px-3 py-8 text-center text-sm text-content-muted">
                   Sin resultados.
                 </td>
               </tr>

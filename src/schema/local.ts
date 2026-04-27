@@ -23,6 +23,7 @@ export const users = pgTable("users", {
   passwordHash: text("password_hash").notNull(),
   displayName: text("display_name").notNull(),
   role: text("role").notNull().default("user"), // 'admin' | 'user'
+  themePreference: text("theme_preference").notNull().default("system"), // 'light' | 'dark' | 'system'
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
 });

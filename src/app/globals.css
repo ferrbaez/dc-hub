@@ -6,6 +6,30 @@
   :root {
     --background: 0 0% 100%;
     --foreground: 222 47% 11%;
+
+    /* Surfaces — used by ui primitives via bg-surface, bg-surface-soft, etc */
+    --surface: 0 0% 100%;
+    --surface-soft: 220 14% 97%;
+    --surface-muted: 220 14% 93%;
+    --surface-border: 220 13% 88%;
+
+    --content: 222 47% 11%;
+    --content-soft: 215 16% 47%;
+    --content-muted: 220 9% 64%;
+  }
+
+  .dark {
+    --background: 232 35% 9%;
+    --foreground: 210 20% 98%;
+
+    --surface: 233 32% 12%;
+    --surface-soft: 234 27% 17%;
+    --surface-muted: 234 22% 22%;
+    --surface-border: 234 20% 26%;
+
+    --content: 210 20% 98%;
+    --content-soft: 220 13% 75%;
+    --content-muted: 220 9% 55%;
   }
 
   * {
@@ -15,5 +39,13 @@
   body {
     @apply bg-background text-foreground;
     font-feature-settings: "rlig" 1, "calt" 1;
+  }
+}
+
+/* Smooth theme transitions for surface and text colors only — leaves layout
+   transitions untouched and avoids the hover-flicker. */
+@layer utilities {
+  .theme-transition {
+    transition: background-color 200ms ease, border-color 200ms ease, color 200ms ease;
   }
 }

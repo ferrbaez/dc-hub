@@ -10,7 +10,7 @@ import {
   getWeatherLatest,
 } from "@/lib/queries/scada/timeseries";
 import { getTrafosForFeeder } from "@/lib/queries/scada/trafos";
-import { protectedProcedure, router } from "@/server/trpc";
+import { areaProcedure, protectedProcedure, router } from "@/server/trpc";
 import { z } from "zod";
 
 // Time-range selector for the /graficos page.
@@ -74,8 +74,9 @@ export const siteRouter = router({
     return listProjectsRollup();
   }),
 
-  /** Local DB: contract allocations per project (from client_tariffs). */
-  tariffAllocations: protectedProcedure.query(async () => {
+  /** Local DB: contract allocations per project (from client_tariffs).
+   * Sensitive (commercial data) — restricted to `core` area + admins. */
+  tariffAllocations: areaProcedure("core").query(async () => {
     return listTariffAllocations();
   }),
 });

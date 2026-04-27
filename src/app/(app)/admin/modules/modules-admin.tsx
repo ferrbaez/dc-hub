@@ -9,13 +9,13 @@ export function ModulesAdmin() {
 
   return (
     <div className="space-y-4">
-      <p className="text-sm text-slate-600">
+      <p className="text-sm text-content-soft">
         {modulesQuery.data ? `${modulesQuery.data.length} módulo(s)` : "Cargando..."}
       </p>
 
-      <div className="overflow-hidden rounded-lg border border-slate-200 bg-white">
+      <div className="overflow-hidden rounded-lg border border-surface-border bg-surface">
         <table className="w-full text-sm">
-          <thead className="bg-slate-50 text-left text-xs uppercase tracking-wider text-slate-500">
+          <thead className="bg-surface-soft text-left text-xs uppercase tracking-wider text-content-muted">
             <tr>
               <th className="px-3 py-2 font-medium">Slug</th>
               <th className="px-3 py-2 font-medium">Área</th>
@@ -23,11 +23,11 @@ export function ModulesAdmin() {
               <th className="px-3 py-2 font-medium">Usuarios con acceso</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-slate-100">
+          <tbody className="divide-y divide-surface-border">
             {modulesQuery.data?.map((m) => {
               const unique = Array.from(new Map(m.accessUsers.map((u) => [u.id, u])).values());
               return (
-                <tr key={m.slug} className="hover:bg-slate-50">
+                <tr key={m.slug} className="hover:bg-surface-soft">
                   <td className="px-3 py-2 font-mono text-xs">{m.slug}</td>
                   <td className="px-3 py-2">
                     <span className="rounded bg-penguin-lime/15 px-1.5 py-0.5 font-mono text-[10px] text-emerald-700">
@@ -45,13 +45,13 @@ export function ModulesAdmin() {
                   </td>
                   <td className="px-3 py-2">
                     {unique.length === 0 ? (
-                      <span className="text-xs text-slate-400">nadie</span>
+                      <span className="text-xs text-content-muted">nadie</span>
                     ) : (
                       <div className="flex flex-wrap gap-1">
                         {unique.map((u) => (
                           <span
                             key={u.id}
-                            className="rounded bg-slate-100 px-1.5 py-0.5 text-[10px] text-slate-700"
+                            className="rounded bg-surface-muted px-1.5 py-0.5 text-[10px] text-content"
                             title={`vía ${u.via}`}
                           >
                             {u.email}
@@ -65,14 +65,14 @@ export function ModulesAdmin() {
             })}
             {modulesQuery.isLoading && (
               <tr>
-                <td colSpan={4} className="px-3 py-8 text-center text-slate-400">
+                <td colSpan={4} className="px-3 py-8 text-center text-content-muted">
                   <Loader2 className="mx-auto h-4 w-4 animate-spin" />
                 </td>
               </tr>
             )}
             {!modulesQuery.isLoading && (modulesQuery.data?.length ?? 0) === 0 && (
               <tr>
-                <td colSpan={4} className="px-3 py-12 text-center text-sm text-slate-400">
+                <td colSpan={4} className="px-3 py-12 text-center text-sm text-content-muted">
                   Todavía no hay módulos creados. Usá{" "}
                   <code className="font-mono">pnpm new:module &lt;area&gt;/&lt;nombre&gt;</code>{" "}
                   para arrancar el primero.

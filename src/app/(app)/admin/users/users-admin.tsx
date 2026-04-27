@@ -42,7 +42,7 @@ export function UsersAdmin() {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <p className="text-sm text-slate-600">
+        <p className="text-sm text-content-soft">
           {usersQuery.data ? `${usersQuery.data.length} usuario(s)` : "Cargando..."}
         </p>
         <button
@@ -55,9 +55,9 @@ export function UsersAdmin() {
         </button>
       </div>
 
-      <div className="overflow-hidden rounded-lg border border-slate-200 bg-white">
+      <div className="overflow-hidden rounded-lg border border-surface-border bg-surface">
         <table className="w-full text-sm">
-          <thead className="bg-slate-50 text-left text-xs uppercase tracking-wider text-slate-500">
+          <thead className="bg-surface-soft text-left text-xs uppercase tracking-wider text-content-muted">
             <tr>
               <th className="px-3 py-2 font-medium">Email</th>
               <th className="px-3 py-2 font-medium">Nombre</th>
@@ -67,7 +67,7 @@ export function UsersAdmin() {
               <th className="px-3 py-2 font-medium" />
             </tr>
           </thead>
-          <tbody className="divide-y divide-slate-100">
+          <tbody className="divide-y divide-surface-border">
             {usersQuery.data?.map((rawUser) => {
               const u: UserRow = {
                 id: rawUser.id,
@@ -78,7 +78,7 @@ export function UsersAdmin() {
                 moduleGrants: rawUser.moduleGrants,
               };
               return (
-                <tr key={u.id} className="hover:bg-slate-50">
+                <tr key={u.id} className="hover:bg-surface-soft">
                   <td className="px-3 py-2 font-mono text-xs">{u.email}</td>
                   <td className="px-3 py-2">{u.displayName}</td>
                   <td className="px-3 py-2">
@@ -86,7 +86,7 @@ export function UsersAdmin() {
                       className={`rounded-full px-2 py-0.5 text-xs font-medium ${
                         u.role === "admin"
                           ? "bg-penguin-violet/10 text-penguin-violet"
-                          : "bg-slate-100 text-slate-600"
+                          : "bg-surface-muted text-content-soft"
                       }`}
                     >
                       {u.role}
@@ -94,14 +94,16 @@ export function UsersAdmin() {
                   </td>
                   <td className="px-3 py-2">
                     <div className="flex flex-wrap gap-1">
-                      {u.areas.length === 0 && <span className="text-xs text-slate-400">—</span>}
+                      {u.areas.length === 0 && (
+                        <span className="text-xs text-content-muted">—</span>
+                      )}
                       {u.areas.map((a) => (
                         <span
                           key={a.area}
                           className={`rounded px-1.5 py-0.5 text-[10px] font-medium ${
                             a.mode === "dev"
                               ? "bg-penguin-lime/15 text-emerald-700"
-                              : "bg-slate-100 text-slate-600"
+                              : "bg-surface-muted text-content-soft"
                           }`}
                           title={`${AREA_LABELS[a.area]} (${a.mode})`}
                         >
@@ -113,7 +115,7 @@ export function UsersAdmin() {
                   <td className="px-3 py-2">
                     <div className="flex flex-wrap gap-1">
                       {u.moduleGrants.length === 0 && (
-                        <span className="text-xs text-slate-400">—</span>
+                        <span className="text-xs text-content-muted">—</span>
                       )}
                       {u.moduleGrants.map((g) => (
                         <span
@@ -130,7 +132,7 @@ export function UsersAdmin() {
                       <button
                         type="button"
                         onClick={() => setEditing(u)}
-                        className="rounded p-1.5 text-slate-500 hover:bg-slate-100 hover:text-penguin-obsidian"
+                        className="rounded p-1.5 text-content-muted hover:bg-surface-muted hover:text-content"
                         title="Editar"
                       >
                         <PencilLine className="h-4 w-4" />
@@ -142,7 +144,7 @@ export function UsersAdmin() {
                             deleteMut.mutate({ id: u.id });
                           }
                         }}
-                        className="rounded p-1.5 text-slate-500 hover:bg-red-50 hover:text-red-600"
+                        className="rounded p-1.5 text-content-muted hover:bg-red-50 hover:text-red-600"
                         title="Borrar"
                       >
                         <Trash2 className="h-4 w-4" />
@@ -154,7 +156,7 @@ export function UsersAdmin() {
             })}
             {usersQuery.isLoading && (
               <tr>
-                <td colSpan={6} className="px-3 py-8 text-center text-slate-400">
+                <td colSpan={6} className="px-3 py-8 text-center text-content-muted">
                   <Loader2 className="mx-auto h-4 w-4 animate-spin" />
                 </td>
               </tr>

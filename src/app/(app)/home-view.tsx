@@ -50,32 +50,37 @@ function TabCard({
       type="button"
       onClick={() => onSelect(id)}
       className={cn(
-        "group flex flex-col items-start rounded-lg border p-4 text-left transition-all",
+        "group flex flex-col items-start rounded-xl border p-4 text-left transition-all theme-transition",
         active
-          ? "border-penguin-lime/80 bg-penguin-lime/10 shadow-sm ring-1 ring-penguin-lime/40"
-          : "border-slate-200 bg-white hover:border-penguin-lime/40 hover:bg-penguin-lime/5",
+          ? "border-penguin-violet/40 bg-penguin-violet/5 shadow-sm ring-1 ring-penguin-violet/20 dark:bg-penguin-violet/15 dark:ring-penguin-violet/30"
+          : "border-surface-border bg-surface hover:border-penguin-violet/30 hover:bg-penguin-violet/5 dark:hover:bg-penguin-violet/10",
       )}
     >
       <div className="flex w-full items-center justify-between">
         <div
           className={cn(
-            "grid h-8 w-8 place-items-center rounded-md transition-colors",
+            "grid h-9 w-9 place-items-center rounded-lg transition-colors",
             active
-              ? "bg-penguin-obsidian text-penguin-lime"
-              : "bg-slate-100 text-penguin-cool-gray group-hover:bg-penguin-obsidian group-hover:text-penguin-lime",
+              ? "bg-penguin-violet text-white shadow-sm shadow-penguin-violet/30"
+              : "bg-surface-muted text-content-soft group-hover:bg-penguin-violet group-hover:text-white",
           )}
         >
           {icon}
         </div>
-        <span className="text-[10px] font-semibold uppercase tracking-wider text-penguin-cool-gray">
+        <span
+          className={cn(
+            "text-[10px] font-semibold uppercase tracking-wider",
+            active ? "text-penguin-violet" : "text-content-muted",
+          )}
+        >
           {label}
         </span>
       </div>
-      <div className="mt-3 flex items-baseline gap-1">
-        <div className="text-2xl font-semibold tabular-nums text-penguin-obsidian">{value}</div>
-        {unit && <div className="text-sm text-penguin-cool-gray">{unit}</div>}
+      <div className="mt-4 flex items-baseline gap-1">
+        <div className="text-2xl font-semibold tabular-nums text-content">{value}</div>
+        {unit && <div className="text-sm text-content-soft">{unit}</div>}
       </div>
-      <div className="mt-1 text-xs text-penguin-cool-gray">{description}</div>
+      <div className="mt-1 text-xs text-content-muted">{description}</div>
     </button>
   );
 }
@@ -143,16 +148,16 @@ export function HomeView() {
     <div className="space-y-6 p-6">
       <div className="flex items-end justify-between gap-4">
         <div>
-          <h2 className="text-2xl font-semibold tracking-tight text-penguin-obsidian">
+          <h2 className="text-2xl font-semibold tracking-tight text-content">
             Sitio — vista operativa
           </h2>
-          <p className="mt-1 text-sm text-penguin-cool-gray">
+          <p className="mt-1 text-sm text-content-soft">
             Elegí una tarjeta para cambiar entre <strong>Producción</strong> (ICS),{" "}
             <strong>Cooling</strong> (SCADA térmico) y <strong>Eléctrico</strong> (Alimentadores
             SCADA).
           </p>
         </div>
-        <div className="flex items-center gap-3 text-xs text-slate-500">
+        <div className="flex items-center gap-3 text-xs text-content-muted">
           {lastUpdated && (
             <span className="tabular-nums">Actualizado {formatClock(lastUpdated)}</span>
           )}
@@ -164,7 +169,7 @@ export function HomeView() {
               if (activeView === "cooling") cooling.refetch();
             }}
             disabled={containers.isFetching}
-            className="inline-flex items-center gap-1.5 rounded-md border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-penguin-obsidian shadow-sm transition-colors hover:border-penguin-lime/60 hover:bg-penguin-lime/10 disabled:opacity-50"
+            className="inline-flex items-center gap-1.5 rounded-lg border border-surface-border bg-surface px-3 py-1.5 text-xs font-medium text-content shadow-sm transition-colors hover:border-penguin-violet/40 hover:bg-penguin-violet/5 disabled:opacity-50"
           >
             {containers.isFetching ? (
               <Loader2 className="h-3.5 w-3.5 animate-spin" />
@@ -177,11 +182,15 @@ export function HomeView() {
       </div>
 
       {isUnreachable && (
-        <div className="flex items-start gap-3 rounded-lg border border-rose-200 bg-rose-50 p-4">
-          <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-rose-600" />
+        <div className="flex items-start gap-3 rounded-xl border border-rose-200 bg-rose-50 p-4 dark:border-rose-900/40 dark:bg-rose-950/30">
+          <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-rose-600 dark:text-rose-400" />
           <div className="text-sm">
-            <div className="font-medium text-rose-900">ICS unreachable — connect VPN</div>
-            <div className="mt-0.5 text-rose-700">{containers.error?.message}</div>
+            <div className="font-medium text-rose-900 dark:text-rose-200">
+              ICS unreachable — connect VPN
+            </div>
+            <div className="mt-0.5 text-rose-700 dark:text-rose-300">
+              {containers.error?.message}
+            </div>
           </div>
         </div>
       )}
@@ -241,7 +250,7 @@ export function HomeView() {
 
       {activeView === "produccion" &&
         (containers.isLoading ? (
-          <div className="flex items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white py-16 text-sm text-penguin-cool-gray">
+          <div className="flex items-center justify-center gap-2 rounded-xl border border-surface-border bg-surface py-16 text-sm text-content-soft">
             <Loader2 className="h-4 w-4 animate-spin" />
             Consultando ICS...
           </div>

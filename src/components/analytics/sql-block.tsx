@@ -25,9 +25,11 @@ export function SqlBlock({ sql, label = "query", onExecute, executing = false }:
   }
 
   return (
-    <div className="overflow-hidden rounded-lg border border-slate-200 bg-penguin-obsidian">
+    <div className="overflow-hidden rounded-lg border border-surface-border bg-penguin-obsidian">
       <div className="flex items-center justify-between border-b border-penguin-obsidian-soft/40 bg-penguin-obsidian px-3 py-1.5">
-        <span className="font-mono text-[10px] uppercase tracking-wider text-slate-400">SQL</span>
+        <span className="font-mono text-[10px] uppercase tracking-wider text-content-muted">
+          SQL
+        </span>
         <div className="flex items-center gap-1">
           <button
             type="button"
@@ -55,7 +57,7 @@ export function SqlBlock({ sql, label = "query", onExecute, executing = false }:
               className={cn(
                 "inline-flex items-center gap-1 rounded px-2 py-1 text-[11px] font-medium transition-colors disabled:opacity-50",
                 label === "draft"
-                  ? "bg-penguin-lime text-penguin-obsidian hover:bg-penguin-lime/90"
+                  ? "bg-penguin-lime text-content hover:bg-penguin-lime/90"
                   : "text-slate-300 hover:bg-penguin-obsidian-soft hover:text-white",
               )}
               title={label === "draft" ? "Ejecutar esta consulta" : "Volver a ejecutar"}

@@ -13,7 +13,7 @@ import bcrypt from "bcryptjs";
 import { eq, sql } from "drizzle-orm";
 import { z } from "zod";
 
-const adminProcedure = protectedProcedure.use(async ({ ctx, next }) => {
+const adminProcedure = protectedProcedure.meta({ adminOnly: true }).use(async ({ ctx, next }) => {
   if (ctx.session.user.role !== "admin") {
     throw new TRPCError({ code: "FORBIDDEN", message: "Solo administradores" });
   }
@@ -62,7 +62,8 @@ function listKnownModules(): ModuleRecord[] {
 type EndpointRecord = {
   path: string;
   type: "query" | "mutation" | "subscription";
-  areas: AreaSlug[]; // empty array = no area gate (publicProcedure / protectedProcedure)
+  areas: AreaSlug[]; // empty array + adminOnly false = open to any logged-in user
+  adminOnly: boolean;
   description?: string;
 };
 
@@ -79,13 +80,19 @@ async function listEndpoints(): Promise<EndpointRecord[]> {
   const out: EndpointRecord[] = [];
   for (const [path, proc] of Object.entries(procs)) {
     const def = (
-      proc as { _def?: { type?: string; meta?: { areas?: AreaSlug[]; description?: string } } }
+      proc as {
+        _def?: {
+          type?: string;
+          meta?: { areas?: AreaSlug[]; adminOnly?: boolean; description?: string };
+        };
+      }
     )._def;
     if (!def) continue;
     out.push({
       path,
       type: (def.type ?? "query") as EndpointRecord["type"],
       areas: def.meta?.areas ?? [],
+      adminOnly: def.meta?.adminOnly === true,
       description: def.meta?.description,
     });
   }

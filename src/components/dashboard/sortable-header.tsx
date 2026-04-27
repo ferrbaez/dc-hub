@@ -41,14 +41,14 @@ export function SortableHeader<K extends string>({
       className={cn(
         "group inline-flex w-full items-center gap-1 font-medium",
         align === "right" ? "justify-end" : "justify-start",
-        active ? "text-penguin-obsidian" : "text-slate-500 hover:text-penguin-obsidian",
+        active ? "text-content" : "text-content-muted hover:text-content",
       )}
     >
       <span>{children}</span>
       <Icon
         className={cn(
           "h-3 w-3 shrink-0",
-          active ? "text-penguin-obsidian" : "text-slate-300 group-hover:text-slate-500",
+          active ? "text-content" : "text-slate-300 group-hover:text-content-muted",
         )}
       />
     </button>

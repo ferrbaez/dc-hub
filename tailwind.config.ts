@@ -6,11 +6,23 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        border: "#e5e7eb",
-        input: "#e5e7eb",
+        border: "hsl(var(--surface-border))",
+        input: "hsl(var(--surface-border))",
         ring: "#b9fd3b",
-        background: "#fafafa",
-        foreground: "#0f101f",
+        background: "hsl(var(--background))",
+        foreground: "hsl(var(--foreground))",
+        // Theme-aware surface tokens (driven by CSS vars in globals.css)
+        surface: {
+          DEFAULT: "hsl(var(--surface))",
+          soft: "hsl(var(--surface-soft))",
+          muted: "hsl(var(--surface-muted))",
+          border: "hsl(var(--surface-border))",
+        },
+        content: {
+          DEFAULT: "hsl(var(--content))",
+          soft: "hsl(var(--content-soft))",
+          muted: "hsl(var(--content-muted))",
+        },
         primary: {
           DEFAULT: "#0f101f",
           foreground: "#fafafa",

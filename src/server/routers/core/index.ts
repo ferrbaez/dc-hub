@@ -15,6 +15,7 @@ import { chatRouter } from "@/server/routers/core/chat";
 import { containersRouter } from "@/server/routers/core/containers";
 import { healthRouter } from "@/server/routers/core/health";
 import { siteRouter } from "@/server/routers/core/site";
+import { usersRouter } from "@/server/routers/core/users";
 import { router } from "@/server/trpc";
 
 export const coreRouter = router({
@@ -22,5 +23,6 @@ export const coreRouter = router({
   health: healthRouter,
   chat: chatRouter,
   site: siteRouter,
+  users: usersRouter,
   admin: adminRouter,
 });

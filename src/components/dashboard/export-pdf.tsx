@@ -224,7 +224,7 @@ export function ExportPdfButton({
       type="button"
       onClick={handleClick}
       disabled={disabled || busy}
-      className="inline-flex items-center gap-1.5 rounded-md border border-slate-200 bg-white px-2.5 py-1 text-[11px] text-penguin-obsidian shadow-sm transition-colors hover:border-penguin-lime/60 hover:bg-penguin-lime/10 disabled:opacity-40"
+      className="inline-flex items-center gap-1.5 rounded-md border border-surface-border bg-surface px-2.5 py-1 text-[11px] text-content shadow-sm transition-colors hover:border-penguin-lime/60 hover:bg-penguin-lime/10 disabled:opacity-40"
       title="Exportar vista actual a PDF"
     >
       {busy ? (

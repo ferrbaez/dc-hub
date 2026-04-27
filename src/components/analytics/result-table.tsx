@@ -65,12 +65,10 @@ export function ResultTable({ columns, rows, rowCount, truncated, messageId }: P
   const hasMore = rows.length > PREVIEW_ROWS;
 
   return (
-    <div className="rounded-lg border border-slate-200 bg-white">
-      <div className="flex items-center justify-between border-b border-slate-200 px-3 py-2">
-        <div className="text-xs text-penguin-cool-gray">
-          <span className="font-medium text-penguin-obsidian">
-            {rowCount.toLocaleString("en-US")}
-          </span>{" "}
+    <div className="rounded-lg border border-surface-border bg-surface">
+      <div className="flex items-center justify-between border-b border-surface-border px-3 py-2">
+        <div className="text-xs text-content-muted">
+          <span className="font-medium text-content">{rowCount.toLocaleString("en-US")}</span>{" "}
           {rowCount === 1 ? "fila" : "filas"}
           {truncated && (
             <span className="ml-2 rounded bg-amber-50 px-1.5 py-0.5 text-[10px] font-medium text-amber-700">
@@ -83,7 +81,7 @@ export function ResultTable({ columns, rows, rowCount, truncated, messageId }: P
         {messageId && rowCount > 0 && (
           <a
             href={`/api/chat/export/${messageId}`}
-            className="inline-flex items-center gap-1.5 rounded-md border border-slate-200 bg-white px-2.5 py-1 text-xs font-medium text-penguin-obsidian shadow-sm transition-colors hover:border-penguin-lime/60 hover:bg-penguin-lime/10"
+            className="inline-flex items-center gap-1.5 rounded-md border border-surface-border bg-surface px-2.5 py-1 text-xs font-medium text-content shadow-sm transition-colors hover:border-penguin-lime/60 hover:bg-penguin-lime/10"
             download
           >
             <Download className="h-3.5 w-3.5" />
@@ -93,18 +91,18 @@ export function ResultTable({ columns, rows, rowCount, truncated, messageId }: P
       </div>
 
       {rowCount === 0 ? (
-        <div className="px-3 py-8 text-center text-sm text-penguin-cool-gray">
+        <div className="px-3 py-8 text-center text-sm text-content-muted">
           Consulta ejecutada, sin resultados.
         </div>
       ) : (
         <div className="max-h-[420px] overflow-auto">
           <table className="w-full text-xs">
-            <thead className="sticky top-0 z-10 bg-slate-50">
-              <tr className="border-b border-slate-200">
+            <thead className="sticky top-0 z-10 bg-surface-soft">
+              <tr className="border-b border-surface-border">
                 {columns.map((col) => (
                   <th
                     key={col}
-                    className="whitespace-nowrap px-3 py-2 text-left font-medium text-penguin-cool-gray"
+                    className="whitespace-nowrap px-3 py-2 text-left font-medium text-content-muted"
                   >
                     {col}
                   </th>
@@ -118,7 +116,10 @@ export function ResultTable({ columns, rows, rowCount, truncated, messageId }: P
                   // key and we have no semantic id to use instead.
                   // biome-ignore lint/suspicious/noArrayIndexKey: stable snapshot
                   key={i}
-                  className={cn("border-b border-slate-100", i % 2 === 1 && "bg-slate-50/40")}
+                  className={cn(
+                    "border-b border-surface-border",
+                    i % 2 === 1 && "bg-surface-soft/40",
+                  )}
                 >
                   {columns.map((col) => {
                     const { text, numeric } = renderCell(row[col]);
@@ -126,9 +127,9 @@ export function ResultTable({ columns, rows, rowCount, truncated, messageId }: P
                       <td
                         key={col}
                         className={cn(
-                          "whitespace-nowrap px-3 py-1.5 text-penguin-obsidian",
+                          "whitespace-nowrap px-3 py-1.5 text-content",
                           numeric && "text-right tabular-nums",
-                          row[col] == null && "text-slate-400",
+                          row[col] == null && "text-content-muted",
                         )}
                         title={text.length > 80 ? text : undefined}
                       >
@@ -147,7 +148,7 @@ export function ResultTable({ columns, rows, rowCount, truncated, messageId }: P
         <button
           type="button"
           onClick={() => setExpanded((e) => !e)}
-          className="flex w-full items-center justify-center gap-1.5 border-t border-slate-200 bg-slate-50 px-3 py-2 text-xs font-medium text-penguin-cool-gray transition-colors hover:bg-slate-100 hover:text-penguin-obsidian"
+          className="flex w-full items-center justify-center gap-1.5 border-t border-surface-border bg-surface-soft px-3 py-2 text-xs font-medium text-content-muted transition-colors hover:bg-surface-muted hover:text-content"
         >
           {expanded ? (
             <>

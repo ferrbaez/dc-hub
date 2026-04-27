@@ -48,7 +48,7 @@ function fmt(v: number | null | undefined, digits = 1, suffix = "") {
 }
 
 function fpTone(fp: number | null) {
-  if (fp == null) return "text-slate-400";
+  if (fp == null) return "text-content-muted";
   const abs = Math.abs(fp);
   if (abs >= 0.95) return "text-emerald-600";
   if (abs >= 0.9) return "text-amber-600";
@@ -122,16 +122,16 @@ function TriPhaseCell({
     <div
       className={cn(
         "ml-auto inline-grid grid-cols-[auto_1fr_auto] items-baseline gap-x-1 text-[11px] leading-tight tabular-nums",
-        allNull ? "text-slate-400" : "text-penguin-obsidian",
+        allNull ? "text-content-muted" : "text-content",
       )}
     >
-      <span className="text-[9px] font-semibold uppercase text-slate-400">R</span>
+      <span className="text-[9px] font-semibold uppercase text-content-muted">R</span>
       <span className="text-right">{fmt(a, digits)}</span>
-      <span className="text-[9px] text-slate-400">{unit}</span>
-      <span className="text-[9px] font-semibold uppercase text-slate-400">S</span>
+      <span className="text-[9px] text-content-muted">{unit}</span>
+      <span className="text-[9px] font-semibold uppercase text-content-muted">S</span>
       <span className="text-right">{fmt(b, digits)}</span>
       <span />
-      <span className="text-[9px] font-semibold uppercase text-slate-400">T</span>
+      <span className="text-[9px] font-semibold uppercase text-content-muted">T</span>
       <span className="text-right">{fmt(c, digits)}</span>
       <span />
     </div>
@@ -207,7 +207,7 @@ export function ElectricoTable() {
 
   if (electrico.isLoading) {
     return (
-      <div className="flex items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white py-16 text-sm text-penguin-cool-gray">
+      <div className="flex items-center justify-center gap-2 rounded-lg border border-surface-border bg-surface py-16 text-sm text-content-muted">
         <Loader2 className="h-4 w-4 animate-spin" />
         Consultando SCADA (Alimentadores + Registros_AL##)...
       </div>
@@ -231,24 +231,24 @@ export function ElectricoTable() {
   const filtersActive = servesFilter.size > 0;
 
   return (
-    <div ref={pdfRef} className="rounded-lg border border-slate-200 bg-white">
-      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 px-4 py-3">
+    <div ref={pdfRef} className="rounded-lg border border-surface-border bg-surface">
+      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-surface-border px-4 py-3">
         <div>
-          <h3 className="text-sm font-semibold text-penguin-obsidian">Eléctrico por alimentador</h3>
-          <p className="text-xs text-penguin-cool-gray">
+          <h3 className="text-sm font-semibold text-content">Eléctrico por alimentador</h3>
+          <p className="text-xs text-content-muted">
             {filtersActive ? `${rows.length} de ${allRows.length}` : `${rows.length} alimentadores`}{" "}
             · total ahora{" "}
-            <span className="tabular-nums font-medium text-penguin-obsidian">
+            <span className="tabular-nums font-medium text-content">
               {fmt(totalKwNow / 1000, 2, " MW")}
             </span>{" "}
             · promedio 1h{" "}
-            <span className="tabular-nums text-penguin-cool-gray">
+            <span className="tabular-nums text-content-muted">
               {fmt(totalKwAvg / 1000, 2, " MW")}
             </span>
           </p>
         </div>
         <div className="flex items-center gap-2" data-pdf-hide="true">
-          <div className="flex items-center gap-1.5 text-[11px] text-penguin-cool-gray">
+          <div className="flex items-center gap-1.5 text-[11px] text-content-muted">
             <Zap className="h-3.5 w-3.5" />
             <span>Alimentadores + Registros_AL*</span>
           </div>
@@ -257,7 +257,7 @@ export function ElectricoTable() {
             onClick={() =>
               expanded.size === rows.length ? collapseAll() : expandAll(rows.map((r) => r.feeder))
             }
-            className="inline-flex items-center gap-1.5 rounded-md border border-slate-200 bg-white px-2.5 py-1 text-[11px] text-penguin-obsidian shadow-sm transition-colors hover:border-penguin-lime/60 hover:bg-penguin-lime/10"
+            className="inline-flex items-center gap-1.5 rounded-md border border-surface-border bg-surface px-2.5 py-1 text-[11px] text-content shadow-sm transition-colors hover:border-penguin-lime/60 hover:bg-penguin-lime/10"
           >
             {expanded.size === rows.length ? (
               <>
@@ -287,7 +287,7 @@ export function ElectricoTable() {
 
       <Table>
         <TableHeader>
-          <TableRow className="border-slate-200">
+          <TableRow className="border-surface-border">
             <TableHead>
               <SortableHeader sortKey="feeder" sort={sort} onSort={setSort}>
                 Alimentador
@@ -344,7 +344,7 @@ export function ElectricoTable() {
                 Overhead
               </span>
             </TableHead>
-            <TableHead className="text-right text-slate-400">
+            <TableHead className="text-right text-content-muted">
               <SortableHeader sortKey="energyNow" sort={sort} onSort={setSort} align="right">
                 Energía
               </SortableHeader>
@@ -356,8 +356,8 @@ export function ElectricoTable() {
             const isExpanded = expanded.has(r.feeder);
             return (
               <Fragment key={r.feeder}>
-                <TableRow className="border-slate-100">
-                  <TableCell className="font-medium text-penguin-obsidian">
+                <TableRow className="border-surface-border">
+                  <TableCell className="font-medium text-content">
                     <button
                       type="button"
                       onClick={() => toggleExpanded(r.feeder)}
@@ -367,16 +367,16 @@ export function ElectricoTable() {
                       {isExpanded ? (
                         <ChevronDown className="h-3.5 w-3.5 text-penguin-violet" />
                       ) : (
-                        <ChevronRight className="h-3.5 w-3.5 text-slate-400" />
+                        <ChevronRight className="h-3.5 w-3.5 text-content-muted" />
                       )}
                       {r.feeder}
                     </button>
                   </TableCell>
-                  <TableCell className="text-penguin-cool-gray">{r.serves}</TableCell>
-                  <TableCell className="text-right tabular-nums font-medium text-penguin-obsidian">
+                  <TableCell className="text-content-muted">{r.serves}</TableCell>
+                  <TableCell className="text-right tabular-nums font-medium text-content">
                     {fmt(r.kwNow, 1, " kW")}
                   </TableCell>
-                  <TableCell className="text-right tabular-nums text-penguin-cool-gray">
+                  <TableCell className="text-right tabular-nums text-content-muted">
                     {fmt(r.kwAvgLastHour, 1, " kW")}
                   </TableCell>
                   <TableCell className="text-right">
@@ -400,17 +400,17 @@ export function ElectricoTable() {
                   <TableCell className={cn("text-right tabular-nums", fpTone(r.fp))}>
                     {fmt(r.fp, 3)}
                   </TableCell>
-                  <TableCell className="text-right tabular-nums text-penguin-cool-gray">
+                  <TableCell className="text-right tabular-nums text-content-muted">
                     {fmt(r.frequency, 2, " Hz")}
                   </TableCell>
-                  <TableCell className="text-right tabular-nums text-penguin-cool-gray">
+                  <TableCell className="text-right tabular-nums text-content-muted">
                     {fmt(r.bajaKw, 1, " kW")}
                   </TableCell>
                   <TableCell
                     className={cn(
                       "text-right tabular-nums",
                       r.overheadPct == null
-                        ? "text-slate-400"
+                        ? "text-content-muted"
                         : r.overheadPct >= 10
                           ? "text-rose-600 font-semibold"
                           : r.overheadPct >= 5
@@ -426,19 +426,19 @@ export function ElectricoTable() {
                     {r.overheadPct != null ? (
                       <>
                         {fmt(r.overheadKw, 1)}
-                        <span className="ml-1 text-xs text-slate-400">kW</span>
+                        <span className="ml-1 text-xs text-content-muted">kW</span>
                         <div className="text-[10px] font-normal">{fmt(r.overheadPct, 1)}%</div>
                       </>
                     ) : (
                       "—"
                     )}
                   </TableCell>
-                  <TableCell className="text-right tabular-nums text-slate-400">
+                  <TableCell className="text-right tabular-nums text-content-muted">
                     {fmt(r.energyNow, 0)}
                   </TableCell>
                 </TableRow>
                 {isExpanded && (
-                  <TableRow className="bg-slate-50/60">
+                  <TableRow className="bg-surface-soft/60">
                     <TableCell colSpan={11} className="p-0">
                       <TrafoExpansion feeder={r.feeder} />
                     </TableCell>
@@ -449,7 +449,7 @@ export function ElectricoTable() {
           })}
           {rows.length === 0 && (
             <TableRow>
-              <TableCell colSpan={11} className="py-12 text-center text-sm text-penguin-cool-gray">
+              <TableCell colSpan={11} className="py-12 text-center text-sm text-content-muted">
                 Sin resultados con los filtros actuales.
               </TableCell>
             </TableRow>

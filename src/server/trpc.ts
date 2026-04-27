@@ -1,3 +1,4 @@
+import { hasAnyAreaAccess } from "@/lib/access";
 import { AnthropicConfigError } from "@/lib/anthropic";
 import type { AreaSlug } from "@/lib/areas";
 import { IcsConfigError, IcsUnreachableError } from "@/lib/db/ics";
@@ -8,18 +9,23 @@ import type { Context } from "@/server/context";
 import { TRPCError, initTRPC } from "@trpc/server";
 import superjson from "superjson";
 
-const t = initTRPC.context<Context>().create({
-  transformer: superjson,
-  errorFormatter({ shape, error }) {
-    return {
-      ...shape,
-      data: {
-        ...shape.data,
-        code: (error.cause as { code?: string } | undefined)?.code ?? shape.data.code,
-      },
-    };
-  },
-});
+type AppMeta = { areas?: AreaSlug[]; description?: string };
+
+const t = initTRPC
+  .context<Context>()
+  .meta<AppMeta>()
+  .create({
+    transformer: superjson,
+    errorFormatter({ shape, error }) {
+      return {
+        ...shape,
+        data: {
+          ...shape.data,
+          code: (error.cause as { code?: string } | undefined)?.code ?? shape.data.code,
+        },
+      };
+    },
+  });
 
 export const router = t.router;
 
@@ -75,23 +81,31 @@ export const protectedProcedure = t.procedure
   });
 
 /**
- * Procedure that requires the user to have a specific area assigned.
- * Admins (`role === "admin"`) bypass the area check.
+ * Procedure that requires the user to have access to one of the listed areas.
+ * "Access" means: admin, OR user has the area, OR user has a module grant
+ * for any module within one of those areas.
  *
- * Use this in module routers (e.g. `src/modules/mining/<x>/router.ts`) so
- * a user without that area gets a 403 from tRPC, regardless of UI state.
+ * Use the singular `areaProcedure(area)` for the common case. Use the plural
+ * `areasProcedure([...])` for endpoints intentionally shared across areas
+ * (e.g. `core.revenue.*` callable from both mining and finance).
+ *
+ * Auto-tags the procedure with `meta({ areas })` so the introspection in
+ * `/admin/endpoints` can list the requirement without parsing middleware.
  */
-export function areaProcedure(area: AreaSlug) {
-  return protectedProcedure.use(async ({ ctx, next }) => {
+export function areasProcedure(allowed: readonly AreaSlug[]) {
+  return protectedProcedure.meta({ areas: [...allowed] }).use(async ({ ctx, next }) => {
     const user = ctx.session.user;
     if (user.role === "admin") return next();
-    const areas = user.areas ?? [];
-    if (!areas.includes(area)) {
+    if (!hasAnyAreaAccess(user, allowed)) {
       throw new TRPCError({
         code: "FORBIDDEN",
-        message: `Acceso denegado: requiere área "${area}"`,
+        message: `Acceso denegado: requiere una de [${allowed.join(", ")}]`,
       });
     }
     return next();
   });
+}
+
+export function areaProcedure(area: AreaSlug) {
+  return areasProcedure([area]);
 }

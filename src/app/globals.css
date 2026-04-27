@@ -58,3 +58,24 @@
     transition: background-color 200ms ease, border-color 200ms ease, color 200ms ease;
   }
 }
+
+/* Tremor chart overrides for dark mode. Tremor v3 uses Recharts under the
+   hood; its default axis text + grid colors are light-mode only. We re-tint
+   them via the recharts-* class names so dark mode looks intentional. */
+.dark .recharts-cartesian-axis-tick text,
+.dark .recharts-text {
+  fill: hsl(var(--content-muted)) !important;
+}
+.dark .recharts-cartesian-grid line {
+  stroke: hsl(var(--surface-border)) !important;
+}
+.dark .recharts-cartesian-axis-line,
+.dark .recharts-cartesian-axis-tick-line {
+  stroke: hsl(var(--surface-border)) !important;
+}
+.dark .recharts-legend-item-text {
+  color: hsl(var(--content-soft)) !important;
+}
+.dark .recharts-tooltip-wrapper {
+  filter: drop-shadow(0 4px 16px rgba(0, 0, 0, 0.5));
+}

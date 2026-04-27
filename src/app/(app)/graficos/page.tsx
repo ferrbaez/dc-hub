@@ -5,7 +5,7 @@ import { getProjectContract } from "@/lib/constants/project-contracts";
 import { useAutoRefresh } from "@/lib/shell/auto-refresh";
 import { trpc } from "@/lib/trpc/client";
 import { cn } from "@/lib/utils";
-import { AreaChart, BarChart, Card } from "@tremor/react";
+import { AreaChart, BarChart } from "@tremor/react";
 import {
   Activity,
   AlertTriangle,
@@ -57,33 +57,48 @@ function KpiCard({
 }) {
   const bg = {
     default: "bg-surface",
-    lime: "bg-penguin-lime/10",
-    violet: "bg-penguin-violet/10",
-    amber: "bg-amber-50",
-    rose: "bg-rose-50",
+    lime: "bg-surface",
+    violet: "bg-surface",
+    amber: "bg-surface",
+    rose: "bg-surface",
+  }[tone];
+  const accentBar = {
+    default: "",
+    lime: "before:bg-emerald-500",
+    violet: "before:bg-penguin-violet",
+    amber: "before:bg-amber-500",
+    rose: "before:bg-rose-500",
   }[tone];
   const iconBg = {
     default: "bg-surface-muted text-content-soft",
-    lime: "bg-penguin-obsidian text-penguin-lime",
-    violet: "bg-penguin-violet text-white",
-    amber: "bg-amber-500 text-white",
-    rose: "bg-rose-500 text-white",
+    lime: "bg-emerald-500/15 text-emerald-600 dark:bg-emerald-500/25 dark:text-emerald-400",
+    violet:
+      "bg-penguin-violet/15 text-penguin-violet dark:bg-penguin-violet/25 dark:text-penguin-violet",
+    amber: "bg-amber-500/15 text-amber-600 dark:bg-amber-500/25 dark:text-amber-400",
+    rose: "bg-rose-500/15 text-rose-600 dark:bg-rose-500/25 dark:text-rose-400",
   }[tone];
   return (
-    <div className={cn("rounded-lg border border-surface-border p-4 shadow-sm", bg)}>
+    <div
+      className={cn(
+        "relative overflow-hidden rounded-xl border border-surface-border p-4 shadow-sm theme-transition",
+        "before:absolute before:left-0 before:top-0 before:h-full before:w-1 before:content-['']",
+        bg,
+        accentBar,
+      )}
+    >
       <div className="flex items-center justify-between">
         <span className="text-[10px] font-semibold uppercase tracking-wider text-content-muted">
           {label}
         </span>
-        <div className={cn("grid h-6 w-6 place-items-center rounded-md", iconBg)}>
+        <div className={cn("grid h-7 w-7 place-items-center rounded-lg", iconBg)}>
           <Icon className="h-3.5 w-3.5" />
         </div>
       </div>
-      <div className="mt-2 flex items-baseline gap-1">
+      <div className="mt-3 flex items-baseline gap-1">
         <div className="text-2xl font-semibold tabular-nums text-content">{value}</div>
         {unit && <div className="text-xs text-content-muted">{unit}</div>}
       </div>
-      {hint && <div className="mt-0.5 text-[11px] text-content-muted">{hint}</div>}
+      {hint && <div className="mt-1 text-[11px] text-content-muted">{hint}</div>}
     </div>
   );
 }
@@ -100,18 +115,18 @@ function SectionCard({
   children: React.ReactNode;
 }) {
   return (
-    <Card className="!bg-surface !ring-1 !ring-slate-200 !shadow-sm">
+    <div className="rounded-xl border border-surface-border bg-surface p-5 shadow-sm theme-transition">
       <div className="flex items-start justify-between">
         <div>
           <div className="flex items-center gap-2">
-            {Icon && <Icon className="h-4 w-4 text-content-muted" />}
+            {Icon && <Icon className="h-4 w-4 text-penguin-violet" />}
             <h3 className="text-sm font-semibold text-content">{title}</h3>
           </div>
-          {subtitle && <p className="mt-0.5 text-xs text-content-muted">{subtitle}</p>}
+          {subtitle && <p className="mt-1 text-xs text-content-muted">{subtitle}</p>}
         </div>
       </div>
       <div className="mt-4">{children}</div>
-    </Card>
+    </div>
   );
 }
 
@@ -126,11 +141,11 @@ function Loading({ label }: { label: string }) {
 
 function SourceError({ message }: { message?: string }) {
   return (
-    <div className="flex items-start gap-3 rounded-md border border-rose-200 bg-rose-50 p-4">
-      <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-rose-600" />
+    <div className="flex items-start gap-3 rounded-xl border border-rose-200 bg-rose-50 p-4 dark:border-rose-900/40 dark:bg-rose-950/30">
+      <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-rose-600 dark:text-rose-400" />
       <div className="text-sm">
-        <div className="font-medium text-rose-900">Fuente no disponible</div>
-        <div className="mt-0.5 text-rose-700">{message}</div>
+        <div className="font-medium text-rose-900 dark:text-rose-200">Fuente no disponible</div>
+        <div className="mt-0.5 text-rose-700 dark:text-rose-300">{message}</div>
       </div>
     </div>
   );
@@ -262,9 +277,9 @@ export default function GraficosPage() {
               type="button"
               onClick={() => setRange(r.key)}
               className={cn(
-                "rounded-[4px] px-3 py-1 text-xs font-medium transition-colors",
+                "rounded-md px-3 py-1 text-xs font-medium transition-colors",
                 range === r.key
-                  ? "bg-penguin-obsidian text-white"
+                  ? "bg-penguin-violet text-white shadow-sm"
                   : "text-content-muted hover:bg-surface-muted hover:text-content",
               )}
             >
@@ -338,12 +353,12 @@ export default function GraficosPage() {
                   : "rose"
           }
         />
-        <div className="rounded-lg border border-surface-border bg-surface p-4 shadow-sm">
+        <div className="rounded-xl border border-surface-border bg-surface p-4 shadow-sm theme-transition">
           <div className="flex items-center justify-between">
             <span className="text-[10px] font-semibold uppercase tracking-wider text-content-muted">
               Estación meteorológica
             </span>
-            <div className="grid h-6 w-6 place-items-center rounded-md bg-sky-100 text-sky-600">
+            <div className="grid h-7 w-7 place-items-center rounded-lg bg-sky-500/15 text-sky-600 dark:bg-sky-500/25 dark:text-sky-400">
               <CloudRain className="h-3.5 w-3.5" />
             </div>
           </div>
@@ -452,7 +467,7 @@ export default function GraficosPage() {
                 showLegend={false}
                 showAnimation
                 showGradient
-                yAxisWidth={76}
+                yAxisWidth={84}
                 intervalType="preserveStartEnd"
                 curveType="natural"
                 minValue={0}
@@ -490,7 +505,7 @@ export default function GraficosPage() {
               showLegend
               showAnimation
               showGradient
-              yAxisWidth={56}
+              yAxisWidth={64}
               intervalType="preserveStartEnd"
               curveType="natural"
               noDataText={`Sin datos en las últimas ${hours}h.`}
@@ -523,7 +538,7 @@ export default function GraficosPage() {
               showLegend
               showAnimation
               showGridLines
-              yAxisWidth={56}
+              yAxisWidth={64}
               maxValue={100}
             />
           )}
@@ -553,7 +568,7 @@ export default function GraficosPage() {
               showLegend
               showAnimation
               showGradient
-              yAxisWidth={44}
+              yAxisWidth={56}
               curveType="natural"
               noDataText={`Sin datos en las últimas ${hours}h.`}
             />
@@ -584,7 +599,7 @@ export default function GraficosPage() {
             valueFormatter={(v) => `${v.toFixed(2)}%`}
             showLegend={false}
             showAnimation
-            yAxisWidth={50}
+            yAxisWidth={64}
             curveType="monotone"
             noDataText={`Sin datos en las últimas ${hours}h.`}
           />

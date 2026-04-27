@@ -33,10 +33,10 @@ function EmptyState({
 }) {
   return (
     <div className="flex h-full flex-col items-center justify-center px-6 py-12 text-center">
-      <div className="grid h-12 w-12 place-items-center rounded-xl bg-penguin-obsidian text-penguin-lime shadow-sm">
-        <Sparkles className="h-6 w-6" />
+      <div className="grid h-14 w-14 place-items-center rounded-2xl bg-gradient-to-br from-penguin-violet to-penguin-violet/70 text-white shadow-lg shadow-penguin-violet/30">
+        <Sparkles className="h-7 w-7" />
       </div>
-      <h2 className="mt-4 text-lg font-semibold text-content">
+      <h2 className="mt-5 text-lg font-semibold text-content">
         Consultá tus datos en lenguaje natural
       </h2>
       <p className="mt-1 max-w-md text-sm text-content-muted">
@@ -51,7 +51,7 @@ function EmptyState({
             type="button"
             disabled={disabled}
             onClick={() => onExampleClick(q)}
-            className="rounded-lg border border-surface-border bg-surface px-4 py-3 text-left text-sm text-content transition-colors hover:border-penguin-lime/60 hover:bg-penguin-lime/5 disabled:opacity-50"
+            className="rounded-xl border border-surface-border bg-surface px-4 py-3 text-left text-sm text-content shadow-sm transition-all hover:border-penguin-violet/40 hover:bg-penguin-violet/5 hover:shadow-md disabled:opacity-50"
           >
             {q}
           </button>
@@ -71,11 +71,11 @@ function ErrorBanner({ code, message }: { code: string; message: string }) {
           ? "Timeout / rate limit"
           : "Error al procesar la pregunta";
   return (
-    <div className="flex items-start gap-3 rounded-lg border border-rose-200 bg-rose-50 p-3">
-      <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-rose-600" />
+    <div className="flex items-start gap-3 rounded-xl border border-rose-200 bg-rose-50 p-3 dark:border-rose-900/40 dark:bg-rose-950/30">
+      <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-rose-600 dark:text-rose-400" />
       <div className="text-sm">
-        <div className="font-medium text-rose-900">{humanTitle}</div>
-        <div className="mt-0.5 text-xs text-rose-700">{message}</div>
+        <div className="font-medium text-rose-900 dark:text-rose-200">{humanTitle}</div>
+        <div className="mt-0.5 text-xs text-rose-700 dark:text-rose-300">{message}</div>
       </div>
     </div>
   );
@@ -272,7 +272,7 @@ export function ChatPane({ conversationId }: { conversationId: string | null }) 
               <>
                 {!serverAlreadyHasPending && <UserMessage content={pending.question} />}
                 <div className="flex items-start gap-3">
-                  <div className="mt-0.5 grid h-7 w-7 shrink-0 place-items-center rounded-full bg-penguin-obsidian text-penguin-lime">
+                  <div className="mt-0.5 grid h-7 w-7 shrink-0 place-items-center rounded-full bg-gradient-to-br from-penguin-violet to-penguin-violet/70 text-white shadow-sm shadow-penguin-violet/30">
                     <Sparkles className="h-3.5 w-3.5 animate-pulse" />
                   </div>
                   <div className="flex flex-col gap-0.5 pt-1 text-sm text-content-muted">
@@ -315,10 +315,10 @@ export function ChatPane({ conversationId }: { conversationId: string | null }) 
               onClick={() => submit(input)}
               disabled={ask.isPending || !input.trim()}
               className={cn(
-                "inline-flex h-9 shrink-0 items-center gap-1.5 rounded-md px-3 text-sm font-medium transition-colors",
+                "inline-flex h-9 shrink-0 items-center gap-1.5 rounded-lg px-3 text-sm font-medium transition-all",
                 ask.isPending || !input.trim()
                   ? "bg-surface-muted text-content-muted"
-                  : "bg-penguin-obsidian text-white hover:bg-penguin-obsidian-soft",
+                  : "bg-penguin-violet text-white shadow-sm shadow-penguin-violet/30 hover:bg-penguin-violet/90 hover:shadow-md",
               )}
             >
               {ask.isPending ? (

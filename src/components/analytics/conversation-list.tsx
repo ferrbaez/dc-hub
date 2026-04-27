@@ -39,11 +39,11 @@ export function ConversationList({ activeId }: { activeId: string | null }) {
   }
 
   return (
-    <div className="flex h-full flex-col">
+    <div className="flex h-full flex-col bg-surface theme-transition">
       <div className="border-b border-surface-border p-3">
         <Link
           href="/analytics"
-          className="flex items-center justify-center gap-2 rounded-md bg-penguin-obsidian px-3 py-2 text-sm font-medium text-white transition-colors hover:bg-penguin-obsidian-soft"
+          className="flex items-center justify-center gap-2 rounded-lg bg-penguin-violet px-3 py-2 text-sm font-medium text-white shadow-sm shadow-penguin-violet/30 transition-all hover:bg-penguin-violet/90 hover:shadow-md"
         >
           <MessageSquarePlus className="h-4 w-4" />
           Nueva consulta
@@ -71,14 +71,21 @@ export function ConversationList({ activeId }: { activeId: string | null }) {
                   <Link
                     href={`/analytics?c=${c.id}`}
                     className={cn(
-                      "group flex items-start gap-2 rounded-md px-2.5 py-2 text-sm transition-colors",
+                      "group flex items-start gap-2 rounded-lg px-2.5 py-2 text-sm transition-colors",
                       active
-                        ? "bg-surface-muted text-content"
-                        : "text-content hover:bg-surface-muted",
+                        ? "bg-penguin-violet/10 text-content dark:bg-penguin-violet/20"
+                        : "text-content hover:bg-surface-soft",
                     )}
                   >
                     <div className="min-w-0 flex-1">
-                      <div className="truncate text-[13px] font-medium text-content">{c.title}</div>
+                      <div
+                        className={cn(
+                          "truncate text-[13px] font-medium",
+                          active ? "text-penguin-violet" : "text-content",
+                        )}
+                      >
+                        {c.title}
+                      </div>
                       <div className="text-[10px] text-content-muted">
                         {formatRelative(new Date(c.updatedAt))}
                       </div>
@@ -87,7 +94,7 @@ export function ConversationList({ activeId }: { activeId: string | null }) {
                       type="button"
                       onClick={(e) => onDelete(c.id, e)}
                       className={cn(
-                        "shrink-0 rounded p-1 text-content-muted opacity-0 transition-opacity hover:bg-rose-50 hover:text-rose-600 group-hover:opacity-100",
+                        "shrink-0 rounded p-1 text-content-muted opacity-0 transition-opacity hover:bg-rose-500/15 hover:text-rose-500 group-hover:opacity-100",
                         active && "opacity-60",
                       )}
                       aria-label="Eliminar conversación"

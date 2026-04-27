@@ -84,12 +84,12 @@ export function Gauge({
         <div className="text-lg font-semibold tabular-nums leading-tight">
           {display}
           {unit && (
-            <span className="ml-0.5 text-[10px] font-normal text-penguin-cool-gray">{unit}</span>
+            <span className="ml-0.5 text-[10px] font-normal text-content-muted">{unit}</span>
           )}
         </div>
       </div>
-      <div className="mt-1 text-center text-[11px] font-medium text-penguin-obsidian">{label}</div>
-      {sublabel && <div className="text-[10px] text-penguin-cool-gray">{sublabel}</div>}
+      <div className="mt-1 text-center text-[11px] font-medium text-content">{label}</div>
+      {sublabel && <div className="text-[10px] text-content-muted">{sublabel}</div>}
     </div>
   );
 }

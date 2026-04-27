@@ -9,7 +9,7 @@ import type { Context } from "@/server/context";
 import { TRPCError, initTRPC } from "@trpc/server";
 import superjson from "superjson";
 
-type AppMeta = { areas?: AreaSlug[]; description?: string };
+type AppMeta = { areas?: AreaSlug[]; adminOnly?: boolean; description?: string };
 
 const t = initTRPC
   .context<Context>()

@@ -36,10 +36,10 @@ function EmptyState({
       <div className="grid h-12 w-12 place-items-center rounded-xl bg-penguin-obsidian text-penguin-lime shadow-sm">
         <Sparkles className="h-6 w-6" />
       </div>
-      <h2 className="mt-4 text-lg font-semibold text-penguin-obsidian">
+      <h2 className="mt-4 text-lg font-semibold text-content">
         Consultá tus datos en lenguaje natural
       </h2>
-      <p className="mt-1 max-w-md text-sm text-penguin-cool-gray">
+      <p className="mt-1 max-w-md text-sm text-content-muted">
         Hacé una pregunta sobre ICS (mining) o SCADA (eléctrico / trafos). La IA genera el SQL, lo
         ejecuta de forma segura (solo lectura) y te devuelve la tabla. El análisis narrativo es
         opt-in.
@@ -51,7 +51,7 @@ function EmptyState({
             type="button"
             disabled={disabled}
             onClick={() => onExampleClick(q)}
-            className="rounded-lg border border-slate-200 bg-white px-4 py-3 text-left text-sm text-penguin-obsidian transition-colors hover:border-penguin-lime/60 hover:bg-penguin-lime/5 disabled:opacity-50"
+            className="rounded-lg border border-surface-border bg-surface px-4 py-3 text-left text-sm text-content transition-colors hover:border-penguin-lime/60 hover:bg-penguin-lime/5 disabled:opacity-50"
           >
             {q}
           </button>
@@ -249,10 +249,10 @@ export function ChatPane({ conversationId }: { conversationId: string | null }) 
   };
 
   return (
-    <div className="flex h-full min-w-0 flex-col bg-slate-50">
+    <div className="flex h-full min-w-0 flex-col bg-surface-soft">
       <div className="flex-1 overflow-y-auto">
         {isLoadingConversation ? (
-          <div className="flex h-full items-center justify-center text-sm text-penguin-cool-gray">
+          <div className="flex h-full items-center justify-center text-sm text-content-muted">
             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
             Cargando conversación...
           </div>
@@ -275,12 +275,12 @@ export function ChatPane({ conversationId }: { conversationId: string | null }) 
                   <div className="mt-0.5 grid h-7 w-7 shrink-0 place-items-center rounded-full bg-penguin-obsidian text-penguin-lime">
                     <Sparkles className="h-3.5 w-3.5 animate-pulse" />
                   </div>
-                  <div className="flex flex-col gap-0.5 pt-1 text-sm text-penguin-cool-gray">
+                  <div className="flex flex-col gap-0.5 pt-1 text-sm text-content-muted">
                     <div className="flex items-center gap-2">
                       <Loader2 className="h-3.5 w-3.5 animate-spin" />
                       Generando SQL...
                     </div>
-                    <div className="pl-5 text-[10px] text-slate-400">
+                    <div className="pl-5 text-[10px] text-content-muted">
                       Después lo podés revisar y ejecutar con el botón Ejecutar.
                     </div>
                   </div>
@@ -297,9 +297,9 @@ export function ChatPane({ conversationId }: { conversationId: string | null }) 
         )}
       </div>
 
-      <div className="border-t border-slate-200 bg-white px-4 py-3">
+      <div className="border-t border-surface-border bg-surface px-4 py-3">
         <div className="mx-auto max-w-4xl">
-          <div className="flex items-end gap-2 rounded-lg border border-slate-200 bg-white p-2 focus-within:border-penguin-violet focus-within:ring-1 focus-within:ring-penguin-violet/40">
+          <div className="flex items-end gap-2 rounded-lg border border-surface-border bg-surface p-2 focus-within:border-penguin-violet focus-within:ring-1 focus-within:ring-penguin-violet/40">
             <textarea
               value={input}
               onChange={(e) => setInput(e.target.value)}
@@ -307,7 +307,7 @@ export function ChatPane({ conversationId }: { conversationId: string | null }) 
               placeholder="Escribí tu pregunta... (Enter envía, Shift+Enter salto de línea)"
               rows={1}
               disabled={ask.isPending}
-              className="max-h-48 flex-1 resize-none bg-transparent px-2 py-1.5 text-sm text-penguin-obsidian placeholder:text-slate-400 focus:outline-none disabled:opacity-60"
+              className="max-h-48 flex-1 resize-none bg-transparent px-2 py-1.5 text-sm text-content placeholder:text-content-muted focus:outline-none disabled:opacity-60"
               style={{ minHeight: "28px" }}
             />
             <button
@@ -317,7 +317,7 @@ export function ChatPane({ conversationId }: { conversationId: string | null }) 
               className={cn(
                 "inline-flex h-9 shrink-0 items-center gap-1.5 rounded-md px-3 text-sm font-medium transition-colors",
                 ask.isPending || !input.trim()
-                  ? "bg-slate-100 text-slate-400"
+                  ? "bg-surface-muted text-content-muted"
                   : "bg-penguin-obsidian text-white hover:bg-penguin-obsidian-soft",
               )}
             >
@@ -329,7 +329,7 @@ export function ChatPane({ conversationId }: { conversationId: string | null }) 
               Enviar
             </button>
           </div>
-          <p className="mt-1.5 px-1 text-[10px] text-penguin-cool-gray">
+          <p className="mt-1.5 px-1 text-[10px] text-content-muted">
             Solo queries de lectura · Sonnet 4.6 · SQL validado antes de ejecutarse · Análisis y
             follow-up son opt-in · El SQL aparece como draft para que lo revises antes de ejecutar
           </p>

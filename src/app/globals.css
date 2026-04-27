@@ -3,6 +3,15 @@
 @tailwind utilities;
 
 @layer base {
+  /* Tells the browser to render native form controls (select dropdowns,
+     scrollbars, date pickers) using the matching color scheme. */
+  html {
+    color-scheme: light;
+  }
+  html.dark {
+    color-scheme: dark;
+  }
+
   :root {
     --background: 0 0% 100%;
     --foreground: 222 47% 11%;

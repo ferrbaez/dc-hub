@@ -96,16 +96,16 @@ function ThresholdRow({
 }) {
   return (
     <label className="flex items-center justify-between gap-3 py-1 text-xs">
-      <span className="text-penguin-obsidian">{label}</span>
+      <span className="text-content">{label}</span>
       <span className="inline-flex items-center gap-1">
         <input
           type="number"
           step="0.1"
           value={value}
           onChange={(e) => onChange(Number(e.target.value))}
-          className="h-7 w-20 rounded border border-slate-200 px-2 text-right tabular-nums text-penguin-obsidian focus:border-penguin-violet focus:outline-none"
+          className="h-7 w-20 rounded border border-surface-border px-2 text-right tabular-nums text-content focus:border-penguin-violet focus:outline-none"
         />
-        <span className="text-[10px] text-penguin-cool-gray">{suffix}</span>
+        <span className="text-[10px] text-content-muted">{suffix}</span>
       </span>
     </label>
   );
@@ -137,16 +137,16 @@ function ThresholdsPopover({
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
-        className="inline-flex items-center gap-1.5 rounded-md border border-slate-200 bg-white px-2.5 py-1 text-[11px] text-penguin-obsidian shadow-sm hover:border-penguin-lime/60 hover:bg-penguin-lime/10"
+        className="inline-flex items-center gap-1.5 rounded-md border border-surface-border bg-surface px-2.5 py-1 text-[11px] text-content shadow-sm hover:border-penguin-lime/60 hover:bg-penguin-lime/10"
         title="Configurar umbrales"
       >
         <Settings2 className="h-3.5 w-3.5" />
         Umbrales
       </button>
       {open && (
-        <div className="absolute right-0 top-full z-30 mt-1 w-72 rounded-md border border-slate-200 bg-white p-3 shadow-lg">
+        <div className="absolute right-0 top-full z-30 mt-1 w-72 rounded-md border border-surface-border bg-surface p-3 shadow-lg">
           <div className="mb-2 flex items-center justify-between">
-            <span className="text-[10px] font-semibold uppercase tracking-wider text-penguin-cool-gray">
+            <span className="text-[10px] font-semibold uppercase tracking-wider text-content-muted">
               Umbrales de cooling
             </span>
             <button
@@ -196,7 +196,7 @@ function ThresholdsPopover({
               suffix="°C"
             />
           </div>
-          <p className="mt-2 text-[10px] leading-snug text-penguin-cool-gray">
+          <p className="mt-2 text-[10px] leading-snug text-content-muted">
             Se guarda en localStorage. Afecta solo esta vista.
           </p>
         </div>
@@ -320,7 +320,7 @@ export function CoolingTable() {
 
   if (cooling.isLoading) {
     return (
-      <div className="flex items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white py-16 text-sm text-penguin-cool-gray">
+      <div className="flex items-center justify-center gap-2 rounded-lg border border-surface-border bg-surface py-16 text-sm text-content-muted">
         <Loader2 className="h-4 w-4 animate-spin" />
         Consultando SCADA (cooling en paralelo, ~52 containers)...
       </div>
@@ -342,11 +342,11 @@ export function CoolingTable() {
   const filtersActive = clientFilter.size + projectFilter.size + typeFilter.size > 0;
 
   return (
-    <div ref={pdfRef} className="rounded-lg border border-slate-200 bg-white">
-      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 px-4 py-3">
+    <div ref={pdfRef} className="rounded-lg border border-surface-border bg-surface">
+      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-surface-border px-4 py-3">
         <div>
-          <h3 className="text-sm font-semibold text-penguin-obsidian">Cooling por container</h3>
-          <p className="text-xs text-penguin-cool-gray">
+          <h3 className="text-sm font-semibold text-content">Cooling por container</h3>
+          <p className="text-xs text-content-muted">
             {filtersActive ? `${rows.length} de ${allRows.length}` : `${allRows.length} containers`}{" "}
             · SCADA · umbrales:{" "}
             <span className="text-rose-600">ND &gt; {thresholds.ndWaterMax}°C</span> ·{" "}
@@ -355,7 +355,7 @@ export function CoolingTable() {
           </p>
         </div>
         <div className="flex items-center gap-2" data-pdf-hide="true">
-          <div className="flex items-center gap-1.5 text-[11px] text-penguin-cool-gray">
+          <div className="flex items-center gap-1.5 text-[11px] text-content-muted">
             <Thermometer className="h-3.5 w-3.5" />
             <span>SITE_BASELINE §8</span>
           </div>
@@ -380,7 +380,7 @@ export function CoolingTable() {
 
       <Table>
         <TableHeader>
-          <TableRow className="border-slate-200">
+          <TableRow className="border-surface-border">
             <TableHead>
               <SortableHeader sortKey="container" sort={sort} onSort={setSort}>
                 Container
@@ -488,17 +488,17 @@ export function CoolingTable() {
             else if (deltaWarn) alerts.push(<AlertChip key="dw" label="Δ medio" tone="warn" />);
 
             return (
-              <TableRow key={`${r.container}-${r.client}`} className="border-slate-100">
-                <TableCell className="font-medium text-penguin-obsidian">{r.container}</TableCell>
-                <TableCell className="text-penguin-cool-gray">{r.client}</TableCell>
-                <TableCell className="text-penguin-cool-gray">{r.project}</TableCell>
-                <TableCell className="text-xs text-penguin-cool-gray">
+              <TableRow key={`${r.container}-${r.client}`} className="border-surface-border">
+                <TableCell className="font-medium text-content">{r.container}</TableCell>
+                <TableCell className="text-content-muted">{r.client}</TableCell>
+                <TableCell className="text-content-muted">{r.project}</TableCell>
+                <TableCell className="text-xs text-content-muted">
                   {r.type}
                   {r.shape === "ndWaterAir" && (
-                    <span className="ml-1 text-[10px] text-slate-400">· con aire</span>
+                    <span className="ml-1 text-[10px] text-content-muted">· con aire</span>
                   )}
                 </TableCell>
-                <TableCell className="text-right tabular-nums text-penguin-obsidian">
+                <TableCell className="text-right tabular-nums text-content">
                   {fmt(r.waterIn, 1, " °C")}
                 </TableCell>
                 <TableCell
@@ -508,7 +508,7 @@ export function CoolingTable() {
                       ? "font-semibold text-rose-600"
                       : waterWarn
                         ? "font-semibold text-amber-600"
-                        : "text-penguin-obsidian",
+                        : "text-content",
                   )}
                   title={`umbral ${limit}°C`}
                 >
@@ -522,8 +522,8 @@ export function CoolingTable() {
                       : deltaWarn
                         ? "font-semibold text-amber-600"
                         : r.delta == null
-                          ? "text-slate-400"
-                          : "text-penguin-obsidian",
+                          ? "text-content-muted"
+                          : "text-content",
                   )}
                 >
                   {fmt(r.delta, 1, " °C")}
@@ -534,20 +534,20 @@ export function CoolingTable() {
                     caudalAlert
                       ? "font-semibold text-rose-600"
                       : r.flow == null
-                        ? "text-slate-400"
-                        : "text-penguin-cool-gray",
+                        ? "text-content-muted"
+                        : "text-content-muted",
                   )}
                   title={`mín ${thresholds.caudalMin} m³/h`}
                 >
                   {fmt(r.flow, 1, " m³/h")}
                 </TableCell>
-                <TableCell className="text-right tabular-nums text-penguin-cool-gray">
+                <TableCell className="text-right tabular-nums text-content-muted">
                   {fmt(r.pressure, 2, " bar")}
                 </TableCell>
-                <TableCell className="text-right tabular-nums text-penguin-cool-gray">
+                <TableCell className="text-right tabular-nums text-content-muted">
                   {r.coldAisle != null ? fmt(r.coldAisle, 1, " °C") : "—"}
                 </TableCell>
-                <TableCell className="text-right tabular-nums text-penguin-cool-gray">
+                <TableCell className="text-right tabular-nums text-content-muted">
                   {r.hotAisle != null ? fmt(r.hotAisle, 1, " °C") : "—"}
                 </TableCell>
                 <TableCell>
@@ -564,7 +564,7 @@ export function CoolingTable() {
           })}
           {rows.length === 0 && (
             <TableRow>
-              <TableCell colSpan={12} className="py-12 text-center text-sm text-penguin-cool-gray">
+              <TableCell colSpan={12} className="py-12 text-center text-sm text-content-muted">
                 Sin containers con los filtros actuales.
               </TableCell>
             </TableRow>

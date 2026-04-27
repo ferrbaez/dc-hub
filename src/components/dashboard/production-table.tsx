@@ -81,7 +81,7 @@ function efficiencyTone(wth: number) {
 }
 
 function uptimeTone(pct: number | null) {
-  if (pct == null) return "text-slate-400";
+  if (pct == null) return "text-content-muted";
   if (pct >= 95) return "text-emerald-600 font-semibold";
   if (pct >= 90) return "text-amber-600 font-semibold";
   return "text-rose-600 font-semibold";
@@ -328,15 +328,15 @@ export function ProductionTable({ rows: allRows }: { rows: Row[] }) {
     const onlineUp = uptimePctWithFallback(c, "online");
     const hashingUp = uptimePctWithFallback(c, "hashing");
     return (
-      <TableRow key={c.id} className="border-slate-100">
-        <TableCell className="font-medium text-penguin-obsidian">{c.name}</TableCell>
-        <TableCell className="text-penguin-cool-gray">{c.customer_name ?? "—"}</TableCell>
-        <TableCell className="text-penguin-cool-gray">{c.project_name ?? "—"}</TableCell>
-        <TableCell className="text-right tabular-nums text-penguin-obsidian">
+      <TableRow key={c.id} className="border-surface-border">
+        <TableCell className="font-medium text-content">{c.name}</TableCell>
+        <TableCell className="text-content-muted">{c.customer_name ?? "—"}</TableCell>
+        <TableCell className="text-content-muted">{c.project_name ?? "—"}</TableCell>
+        <TableCell className="text-right tabular-nums text-content">
           {fmt(c.hashrate_total, 0)}
-          <span className="ml-1 text-xs text-slate-400">TH/s</span>
+          <span className="ml-1 text-xs text-content-muted">TH/s</span>
         </TableCell>
-        <TableCell className="text-right tabular-nums text-slate-400">
+        <TableCell className="text-right tabular-nums text-content-muted">
           {fmt(c.hashrate_nominal, 0)}
         </TableCell>
         <TableCell className="text-right tabular-nums">
@@ -344,7 +344,7 @@ export function ProductionTable({ rows: allRows }: { rows: Row[] }) {
             className={cn(
               "font-semibold",
               healthPct == null
-                ? "text-slate-400"
+                ? "text-content-muted"
                 : healthPct >= 95
                   ? "text-emerald-600"
                   : healthPct >= 85
@@ -354,15 +354,15 @@ export function ProductionTable({ rows: allRows }: { rows: Row[] }) {
           >
             {fmt(hashing, 0)}
           </span>
-          <span className="mx-1 text-slate-400">/</span>
-          <span className="text-penguin-cool-gray">{fmt(online, 0)}</span>
-          <span className="mx-1 text-slate-400">/</span>
-          <span className="text-slate-400">{fmt(total, 0)}</span>
+          <span className="mx-1 text-content-muted">/</span>
+          <span className="text-content-muted">{fmt(online, 0)}</span>
+          <span className="mx-1 text-content-muted">/</span>
+          <span className="text-content-muted">{fmt(total, 0)}</span>
         </TableCell>
         <TableCell
           className={cn(
             "text-right tabular-nums",
-            repairs > 0 ? "font-medium text-rose-600" : "text-slate-400",
+            repairs > 0 ? "font-medium text-rose-600" : "text-content-muted",
           )}
           title={`total ${total} − hashing ${hashing} = ${repairs}`}
         >
@@ -390,15 +390,15 @@ export function ProductionTable({ rows: allRows }: { rows: Row[] }) {
         </TableCell>
         <TableCell className="text-right tabular-nums">
           {fmt(c.active_power, 1)}
-          <span className="ml-1 text-xs text-slate-400">kW</span>
+          <span className="ml-1 text-xs text-content-muted">kW</span>
         </TableCell>
-        <TableCell className="text-right tabular-nums text-slate-400">
+        <TableCell className="text-right tabular-nums text-content-muted">
           {fmt(c.theoretical_consumption, 1)}
         </TableCell>
         <TableCell
           className={cn(
             "text-right tabular-nums font-medium",
-            eff != null ? efficiencyTone(eff) : "text-slate-400",
+            eff != null ? efficiencyTone(eff) : "text-content-muted",
           )}
         >
           {eff != null ? (
@@ -415,11 +415,11 @@ export function ProductionTable({ rows: allRows }: { rows: Row[] }) {
   }
 
   return (
-    <div ref={pdfRef} className="rounded-lg border border-slate-200 bg-white">
-      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 px-4 py-3">
+    <div ref={pdfRef} className="rounded-lg border border-surface-border bg-surface">
+      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-surface-border px-4 py-3">
         <div>
-          <h3 className="text-sm font-semibold text-penguin-obsidian">Producción por container</h3>
-          <p className="text-xs text-penguin-cool-gray">
+          <h3 className="text-sm font-semibold text-content">Producción por container</h3>
+          <p className="text-xs text-content-muted">
             {filtersActive
               ? `${rows.length} de ${allRows.length} containers`
               : `${allRows.length} containers · fuente ICS`}
@@ -427,20 +427,20 @@ export function ProductionTable({ rows: allRows }: { rows: Row[] }) {
         </div>
         <div className="flex items-center gap-2" data-pdf-hide="true">
           <div className="relative">
-            <Search className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-slate-400" />
+            <Search className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-content-muted" />
             <input
               type="text"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Buscar container, cliente, proyecto"
-              className="h-8 w-64 rounded-md border border-slate-200 bg-white pl-8 pr-7 text-xs text-penguin-obsidian placeholder:text-slate-400 focus:border-penguin-violet focus:outline-none focus:ring-1 focus:ring-penguin-violet/40"
+              className="h-8 w-64 rounded-md border border-surface-border bg-surface pl-8 pr-7 text-xs text-content placeholder:text-content-muted focus:border-penguin-violet focus:outline-none focus:ring-1 focus:ring-penguin-violet/40"
             />
             {search && (
               <button
                 type="button"
                 aria-label="Limpiar búsqueda"
                 onClick={() => setSearch("")}
-                className="absolute right-1.5 top-1/2 -translate-y-1/2 rounded p-0.5 text-slate-400 hover:bg-slate-100 hover:text-penguin-obsidian"
+                className="absolute right-1.5 top-1/2 -translate-y-1/2 rounded p-0.5 text-content-muted hover:bg-surface-muted hover:text-content"
               >
                 <X className="h-3 w-3" />
               </button>
@@ -452,18 +452,18 @@ export function ProductionTable({ rows: allRows }: { rows: Row[] }) {
             className={cn(
               "h-8 rounded-md border px-3 text-xs font-medium transition-colors",
               hashingOnly
-                ? "border-penguin-lime/60 bg-penguin-lime/20 text-penguin-obsidian"
-                : "border-slate-200 bg-white text-slate-600 hover:border-slate-300",
+                ? "border-penguin-lime/60 bg-penguin-lime/20 text-content"
+                : "border-surface-border bg-surface text-content-soft hover:border-surface-border",
             )}
           >
             Solo hashing
           </button>
-          <label className="inline-flex h-8 items-center gap-1.5 rounded-md border border-slate-200 bg-white px-2.5 text-xs text-penguin-obsidian">
-            <span className="text-penguin-cool-gray">Agrupar</span>
+          <label className="inline-flex h-8 items-center gap-1.5 rounded-md border border-surface-border bg-surface px-2.5 text-xs text-content">
+            <span className="text-content-muted">Agrupar</span>
             <select
               value={groupBy}
               onChange={(e) => setGroupBy(e.target.value as GroupBy)}
-              className="bg-transparent text-xs text-penguin-obsidian focus:outline-none"
+              className="bg-transparent text-xs text-content focus:outline-none"
             >
               <option value="none">—</option>
               <option value="customer_name">Cliente</option>
@@ -486,7 +486,7 @@ export function ProductionTable({ rows: allRows }: { rows: Row[] }) {
 
       <Table>
         <TableHeader>
-          <TableRow className="border-slate-200">
+          <TableRow className="border-surface-border">
             <TableHead>
               <SortableHeader sortKey="name" sort={sort} onSort={setSort}>
                 Container
@@ -523,7 +523,7 @@ export function ProductionTable({ rows: allRows }: { rows: Row[] }) {
                 Hashrate
               </SortableHeader>
             </TableHead>
-            <TableHead className="text-right text-slate-400">
+            <TableHead className="text-right text-content-muted">
               <SortableHeader sortKey="hashrate_nominal" sort={sort} onSort={setSort} align="right">
                 Nominal
               </SortableHeader>
@@ -553,7 +553,7 @@ export function ProductionTable({ rows: allRows }: { rows: Row[] }) {
                 Potencia
               </SortableHeader>
             </TableHead>
-            <TableHead className="text-right text-slate-400">
+            <TableHead className="text-right text-content-muted">
               <SortableHeader
                 sortKey="theoretical_consumption"
                 sort={sort}
@@ -577,7 +577,7 @@ export function ProductionTable({ rows: allRows }: { rows: Row[] }) {
                 const isCollapsed = collapsed.has(key);
                 return (
                   <Fragment key={`group-${key}`}>
-                    <TableRow className="border-t-2 border-slate-200 bg-slate-50 font-semibold">
+                    <TableRow className="border-t-2 border-surface-border bg-surface-soft font-semibold">
                       <TableCell className="py-2">
                         <button
                           type="button"
@@ -585,37 +585,37 @@ export function ProductionTable({ rows: allRows }: { rows: Row[] }) {
                           className="flex items-center gap-1.5 text-left"
                         >
                           {isCollapsed ? (
-                            <ChevronRight className="h-3.5 w-3.5 text-penguin-cool-gray" />
+                            <ChevronRight className="h-3.5 w-3.5 text-content-muted" />
                           ) : (
-                            <ChevronDown className="h-3.5 w-3.5 text-penguin-cool-gray" />
+                            <ChevronDown className="h-3.5 w-3.5 text-content-muted" />
                           )}
-                          <span className="text-sm font-semibold text-penguin-obsidian">{key}</span>
+                          <span className="text-sm font-semibold text-content">{key}</span>
                         </button>
                       </TableCell>
-                      <TableCell className="text-[11px] text-penguin-cool-gray">
+                      <TableCell className="text-[11px] text-content-muted">
                         {groupBy === "customer_name" ? "" : `${agg.count} cont.`}
                       </TableCell>
-                      <TableCell className="text-[11px] text-penguin-cool-gray">
+                      <TableCell className="text-[11px] text-content-muted">
                         {groupBy === "project_name" ? "" : `${agg.count} cont.`}
                       </TableCell>
-                      <TableCell className="text-right tabular-nums text-penguin-obsidian">
+                      <TableCell className="text-right tabular-nums text-content">
                         {fmt(agg.hashrate, 0)}
-                        <span className="ml-1 text-xs font-normal text-slate-400">TH/s</span>
+                        <span className="ml-1 text-xs font-normal text-content-muted">TH/s</span>
                       </TableCell>
-                      <TableCell className="text-right tabular-nums text-slate-400">
+                      <TableCell className="text-right tabular-nums text-content-muted">
                         {fmt(agg.nominal, 0)}
                       </TableCell>
                       <TableCell className="text-right tabular-nums">
                         <span className="text-emerald-700">{fmt(agg.hashing, 0)}</span>
-                        <span className="mx-1 text-slate-400">/</span>
-                        <span className="text-penguin-cool-gray">{fmt(agg.online, 0)}</span>
-                        <span className="mx-1 text-slate-400">/</span>
-                        <span className="text-slate-500">{fmt(agg.total, 0)}</span>
+                        <span className="mx-1 text-content-muted">/</span>
+                        <span className="text-content-muted">{fmt(agg.online, 0)}</span>
+                        <span className="mx-1 text-content-muted">/</span>
+                        <span className="text-content-muted">{fmt(agg.total, 0)}</span>
                       </TableCell>
                       <TableCell
                         className={cn(
                           "text-right tabular-nums",
-                          agg.repairs > 0 ? "text-rose-600" : "text-slate-400",
+                          agg.repairs > 0 ? "text-rose-600" : "text-content-muted",
                         )}
                       >
                         {agg.repairs > 0 ? fmt(agg.repairs, 0) : "—"}
@@ -630,17 +630,17 @@ export function ProductionTable({ rows: allRows }: { rows: Row[] }) {
                       >
                         {agg.hashingUptimeAvg != null ? `${fmt(agg.hashingUptimeAvg, 1)}%` : "—"}
                       </TableCell>
-                      <TableCell className="text-right tabular-nums text-penguin-obsidian">
+                      <TableCell className="text-right tabular-nums text-content">
                         {fmt(agg.power, 1)}
-                        <span className="ml-1 text-xs font-normal text-slate-400">kW</span>
+                        <span className="ml-1 text-xs font-normal text-content-muted">kW</span>
                       </TableCell>
-                      <TableCell className="text-right tabular-nums text-slate-400">
+                      <TableCell className="text-right tabular-nums text-content-muted">
                         {fmt(agg.theoretical, 1)}
                       </TableCell>
                       <TableCell
                         className={cn(
                           "text-right tabular-nums",
-                          agg.eff != null ? efficiencyTone(agg.eff) : "text-slate-400",
+                          agg.eff != null ? efficiencyTone(agg.eff) : "text-content-muted",
                         )}
                       >
                         {agg.eff != null ? (
@@ -660,7 +660,7 @@ export function ProductionTable({ rows: allRows }: { rows: Row[] }) {
             : rows.map((c) => renderRow(c))}
           {rows.length === 0 && (
             <TableRow>
-              <TableCell colSpan={12} className="py-12 text-center text-sm text-penguin-cool-gray">
+              <TableCell colSpan={12} className="py-12 text-center text-sm text-content-muted">
                 Sin resultados con los filtros actuales.
               </TableCell>
             </TableRow>

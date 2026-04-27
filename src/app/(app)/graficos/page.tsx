@@ -56,23 +56,23 @@ function KpiCard({
   tone?: "default" | "lime" | "violet" | "amber" | "rose";
 }) {
   const bg = {
-    default: "bg-white",
+    default: "bg-surface",
     lime: "bg-penguin-lime/10",
     violet: "bg-penguin-violet/10",
     amber: "bg-amber-50",
     rose: "bg-rose-50",
   }[tone];
   const iconBg = {
-    default: "bg-slate-100 text-slate-600",
+    default: "bg-surface-muted text-content-soft",
     lime: "bg-penguin-obsidian text-penguin-lime",
     violet: "bg-penguin-violet text-white",
     amber: "bg-amber-500 text-white",
     rose: "bg-rose-500 text-white",
   }[tone];
   return (
-    <div className={cn("rounded-lg border border-slate-200 p-4 shadow-sm", bg)}>
+    <div className={cn("rounded-lg border border-surface-border p-4 shadow-sm", bg)}>
       <div className="flex items-center justify-between">
-        <span className="text-[10px] font-semibold uppercase tracking-wider text-penguin-cool-gray">
+        <span className="text-[10px] font-semibold uppercase tracking-wider text-content-muted">
           {label}
         </span>
         <div className={cn("grid h-6 w-6 place-items-center rounded-md", iconBg)}>
@@ -80,10 +80,10 @@ function KpiCard({
         </div>
       </div>
       <div className="mt-2 flex items-baseline gap-1">
-        <div className="text-2xl font-semibold tabular-nums text-penguin-obsidian">{value}</div>
-        {unit && <div className="text-xs text-penguin-cool-gray">{unit}</div>}
+        <div className="text-2xl font-semibold tabular-nums text-content">{value}</div>
+        {unit && <div className="text-xs text-content-muted">{unit}</div>}
       </div>
-      {hint && <div className="mt-0.5 text-[11px] text-penguin-cool-gray">{hint}</div>}
+      {hint && <div className="mt-0.5 text-[11px] text-content-muted">{hint}</div>}
     </div>
   );
 }
@@ -100,14 +100,14 @@ function SectionCard({
   children: React.ReactNode;
 }) {
   return (
-    <Card className="!bg-white !ring-1 !ring-slate-200 !shadow-sm">
+    <Card className="!bg-surface !ring-1 !ring-slate-200 !shadow-sm">
       <div className="flex items-start justify-between">
         <div>
           <div className="flex items-center gap-2">
-            {Icon && <Icon className="h-4 w-4 text-penguin-cool-gray" />}
-            <h3 className="text-sm font-semibold text-penguin-obsidian">{title}</h3>
+            {Icon && <Icon className="h-4 w-4 text-content-muted" />}
+            <h3 className="text-sm font-semibold text-content">{title}</h3>
           </div>
-          {subtitle && <p className="mt-0.5 text-xs text-penguin-cool-gray">{subtitle}</p>}
+          {subtitle && <p className="mt-0.5 text-xs text-content-muted">{subtitle}</p>}
         </div>
       </div>
       <div className="mt-4">{children}</div>
@@ -117,7 +117,7 @@ function SectionCard({
 
 function Loading({ label }: { label: string }) {
   return (
-    <div className="flex h-[280px] items-center justify-center gap-2 text-sm text-penguin-cool-gray">
+    <div className="flex h-[280px] items-center justify-center gap-2 text-sm text-content-muted">
       <Loader2 className="h-4 w-4 animate-spin" />
       {label}
     </div>
@@ -255,7 +255,7 @@ export default function GraficosPage() {
   return (
     <div className="space-y-6 p-6">
       <div className="flex flex-wrap items-center justify-end gap-4">
-        <div className="flex items-center gap-1 rounded-md border border-slate-200 bg-white p-0.5 shadow-sm">
+        <div className="flex items-center gap-1 rounded-md border border-surface-border bg-surface p-0.5 shadow-sm">
           {RANGES.map((r) => (
             <button
               key={r.key}
@@ -265,7 +265,7 @@ export default function GraficosPage() {
                 "rounded-[4px] px-3 py-1 text-xs font-medium transition-colors",
                 range === r.key
                   ? "bg-penguin-obsidian text-white"
-                  : "text-penguin-cool-gray hover:bg-slate-100 hover:text-penguin-obsidian",
+                  : "text-content-muted hover:bg-surface-muted hover:text-content",
               )}
             >
               {r.label}
@@ -338,9 +338,9 @@ export default function GraficosPage() {
                   : "rose"
           }
         />
-        <div className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
+        <div className="rounded-lg border border-surface-border bg-surface p-4 shadow-sm">
           <div className="flex items-center justify-between">
-            <span className="text-[10px] font-semibold uppercase tracking-wider text-penguin-cool-gray">
+            <span className="text-[10px] font-semibold uppercase tracking-wider text-content-muted">
               Estación meteorológica
             </span>
             <div className="grid h-6 w-6 place-items-center rounded-md bg-sky-100 text-sky-600">
@@ -349,38 +349,38 @@ export default function GraficosPage() {
           </div>
           <div className="mt-2 grid grid-cols-2 gap-2 text-xs">
             <div>
-              <div className="flex items-center gap-1 text-penguin-cool-gray">
+              <div className="flex items-center gap-1 text-content-muted">
                 <Thermometer className="h-3 w-3" />
                 <span>Temp</span>
               </div>
-              <div className="text-lg font-semibold tabular-nums text-penguin-obsidian">
+              <div className="text-lg font-semibold tabular-nums text-content">
                 {fmt(weather.data?.temperature, 1, " °C")}
               </div>
             </div>
             <div>
-              <div className="flex items-center gap-1 text-penguin-cool-gray">
+              <div className="flex items-center gap-1 text-content-muted">
                 <Droplets className="h-3 w-3" />
                 <span>HR</span>
               </div>
-              <div className="text-lg font-semibold tabular-nums text-penguin-obsidian">
+              <div className="text-lg font-semibold tabular-nums text-content">
                 {fmt(weather.data?.humidity, 0, " %")}
               </div>
             </div>
             <div>
-              <div className="flex items-center gap-1 text-penguin-cool-gray">
+              <div className="flex items-center gap-1 text-content-muted">
                 <Wind className="h-3 w-3" />
                 <span>Viento</span>
               </div>
-              <div className="text-sm font-semibold tabular-nums text-penguin-obsidian">
+              <div className="text-sm font-semibold tabular-nums text-content">
                 {fmt(weather.data?.windSpeed, 1, " m/s")}
               </div>
             </div>
             <div>
-              <div className="flex items-center gap-1 text-penguin-cool-gray">
+              <div className="flex items-center gap-1 text-content-muted">
                 <CloudRain className="h-3 w-3" />
                 <span>Lluvia</span>
               </div>
-              <div className="text-sm font-semibold tabular-nums text-penguin-obsidian">
+              <div className="text-sm font-semibold tabular-nums text-content">
                 {fmt(weather.data?.rain, 1, " mm")}
               </div>
             </div>
@@ -397,7 +397,7 @@ export default function GraficosPage() {
         {projects.isLoading ? (
           <Loading label="Consultando ICS + local..." />
         ) : projectWithContract.length === 0 ? (
-          <div className="py-8 text-center text-sm text-penguin-cool-gray">
+          <div className="py-8 text-center text-sm text-content-muted">
             Sin proyectos con containers activos.
           </div>
         ) : (
@@ -509,7 +509,7 @@ export default function GraficosPage() {
           {projects.isLoading ? (
             <Loading label="Consultando ICS..." />
           ) : projectBars.length === 0 ? (
-            <div className="py-8 text-center text-sm text-penguin-cool-gray">
+            <div className="py-8 text-center text-sm text-content-muted">
               Uptime no disponible (container_histories sin permiso de lectura).
             </div>
           ) : (
@@ -600,7 +600,7 @@ export default function GraficosPage() {
         <div className="overflow-x-auto">
           <table className="w-full min-w-[800px] text-xs">
             <thead>
-              <tr className="border-b border-slate-200 text-left text-[10px] uppercase tracking-wider text-penguin-cool-gray">
+              <tr className="border-b border-surface-border text-left text-[10px] uppercase tracking-wider text-content-muted">
                 <th className="py-2 pr-4 font-semibold">Proyecto</th>
                 <th className="py-2 pr-4 font-semibold">Cliente</th>
                 <th className="py-2 pr-4 text-right font-semibold">Containers</th>
@@ -618,23 +618,21 @@ export default function GraficosPage() {
                 const mw = p.active_power_kw / 1000;
                 const usePct = p.consumption_pct;
                 return (
-                  <tr key={p.project_id} className="border-b border-slate-100 last:border-b-0">
-                    <td className="py-2 pr-4 font-medium text-penguin-obsidian">
-                      {p.project_name}
-                    </td>
-                    <td className="py-2 pr-4 text-penguin-cool-gray">{p.client_name}</td>
+                  <tr key={p.project_id} className="border-b border-surface-border last:border-b-0">
+                    <td className="py-2 pr-4 font-medium text-content">{p.project_name}</td>
+                    <td className="py-2 pr-4 text-content-muted">{p.client_name}</td>
                     <td className="py-2 pr-4 text-right tabular-nums">{p.container_count}</td>
-                    <td className="py-2 pr-4 text-right tabular-nums text-penguin-obsidian">
+                    <td className="py-2 pr-4 text-right tabular-nums text-content">
                       {fmt(mw, 2, " MW")}
                     </td>
-                    <td className="py-2 pr-4 text-right tabular-nums text-penguin-cool-gray">
+                    <td className="py-2 pr-4 text-right tabular-nums text-content-muted">
                       {p.allocation_mw ? `${p.allocation_mw} MW` : "—"}
                     </td>
                     <td
                       className={cn(
                         "py-2 pr-4 text-right tabular-nums",
                         usePct == null
-                          ? "text-slate-400"
+                          ? "text-content-muted"
                           : usePct >= 100
                             ? "text-rose-600 font-semibold"
                             : usePct >= 90
@@ -647,16 +645,16 @@ export default function GraficosPage() {
                     <td className="py-2 pr-4 text-right tabular-nums">
                       {fmt(p.hashrate_total_ths / 1000, 2, " PH/s")}
                     </td>
-                    <td className="py-2 pr-4 text-right tabular-nums text-penguin-cool-gray">
+                    <td className="py-2 pr-4 text-right tabular-nums text-content-muted">
                       <span className="text-emerald-700">{p.miners_hashing.toLocaleString()}</span>
-                      <span className="mx-1 text-slate-400">/</span>
+                      <span className="mx-1 text-content-muted">/</span>
                       <span>{p.total_miners.toLocaleString()}</span>
                     </td>
                     <td
                       className={cn(
                         "py-2 pr-4 text-right tabular-nums",
                         p.online_uptime_pct == null
-                          ? "text-slate-400"
+                          ? "text-content-muted"
                           : p.online_uptime_pct >= 95
                             ? "text-emerald-600"
                             : p.online_uptime_pct >= 90
@@ -670,7 +668,7 @@ export default function GraficosPage() {
                       className={cn(
                         "py-2 pr-4 text-right tabular-nums",
                         p.hashing_uptime_pct == null
-                          ? "text-slate-400"
+                          ? "text-content-muted"
                           : p.hashing_uptime_pct >= 95
                             ? "text-emerald-600"
                             : p.hashing_uptime_pct >= 90
@@ -685,7 +683,7 @@ export default function GraficosPage() {
               })}
               {projectWithContract.length === 0 && (
                 <tr>
-                  <td colSpan={10} className="py-8 text-center text-sm text-penguin-cool-gray">
+                  <td colSpan={10} className="py-8 text-center text-sm text-content-muted">
                     Sin proyectos.
                   </td>
                 </tr>
